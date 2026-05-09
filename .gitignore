@@ -7,3 +7,8 @@ __pycache__/
 # Node / Frontend
 frontend/
 .DS_Store
+
+backend/gdg26/
+__pycache__/
+*.pyc
+.env
