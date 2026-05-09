@@ -78,12 +78,12 @@ class ClaimReview(BaseModel):
 # 2. Gemini client + helpers
 # -----------------------------
 
-MODEL_NAME = "gemini-3.1-flash-lite"
+MODEL_NAME = "gemini-1.5-flash"
 
 
 def _get_llm() -> ChatGoogleGenerativeAI:
     return ChatGoogleGenerativeAI(
-        model=MODEL_NAME,
+        model="gemini-flash-lite-latest",
         temperature=0.1,
         max_retries=1,
     )

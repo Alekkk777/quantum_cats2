@@ -1,8 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
 python-dotenv
-google-generativeai  
+python-multipart
+pypdf
+google-generativeai
 langchain
 langchain-google-genai
 langchain-community

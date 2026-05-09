@@ -2,41 +2,79 @@ import json
 import re
 import os
 
-def elabora_documento(file_markdown_path):
-    print("🚀 Inizio ingestione documento...")
-    
-    with open(file_markdown_path, "r", encoding="utf-8") as f:
-        testo_completo = f.read()
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
-    # 1. CHUNKING SEMANTICO: Dividiamo il testo basandoci sui titoli Markdown (## o ###)
-    # Questo espressione regolare taglia il testo ogni volta che trova un nuovo titolo
-    sezioni_grezze = re.split(r'\n(?=#{2,3} )', testo_completo)
-    
-    database_vettoriale_simulato = {}
-    
-    for i, blocco in enumerate(sezioni_grezze):
-        if not blocco.strip():
+
+def _leggi_testo(file_path: str) -> str:
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".pdf":
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(file_path)
+            pagine = []
+            for page in reader.pages:
+                testo = page.extract_text()
+                if testo:
+                    pagine.append(testo)
+            return "\n\n".join(pagine)
+        except Exception as e:
+            raise ValueError(f"Impossibile leggere il PDF: {e}")
+    else:
+        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+            return f.read()
+
+
+def _chunk_testo(testo: str) -> dict:
+    """Divide il testo in sezioni basandosi su titoli Markdown o paragrafi."""
+    # Prova prima con titoli Markdown
+    sezioni_grezze = re.split(r'\n(?=#{1,3} )', testo)
+
+    # Se non ci sono titoli, divide ogni ~300 parole
+    if len(sezioni_grezze) <= 1:
+        parole = testo.split()
+        chunk_size = 300
+        sezioni_grezze = [
+            " ".join(parole[i:i + chunk_size])
+            for i in range(0, len(parole), chunk_size)
+        ]
+
+    db = {}
+    idx = 1
+    for blocco in sezioni_grezze:
+        blocco = blocco.strip()
+        if len(blocco) < 30:
             continue
-            
-        # Generiamo un ID univoco per il blocco (es. "sezione_1")
-        sezione_id = f"sezione_{i+1}"
-        
-        # 2. VETTORIZZAZIONE (Per l'Hackathon: Salviamo semplicemente il chunk pulito)
-        # Se volete usare i veri vettori di Gemini, qui chiamereste:
-        # embedding = genai.embed_content(model="models/text-embedding-004", content=blocco)
-        
-        database_vettoriale_simulato[sezione_id] = blocco.strip()
-        print(f"✅ Ingerito chunk {sezione_id}: {blocco[:50]}...")
+        sezione_id = f"sezione_{idx}"
+        db[sezione_id] = blocco
+        print(f"✅ Ingerito {sezione_id}: {blocco[:60]}...")
+        idx += 1
 
-    # 3. SALVATAGGIO NEL "VECTOR DB" LOCALE
-    os.makedirs("data", exist_ok=True)
-    with open("data/source_chunks.json", "w", encoding="utf-8") as f:
-        json.dump(database_vettoriale_simulato, f, indent=2)
-        
-    print("🎉 Ingestione completata! DB locale pronto per l'Orchestratore.")
+    return db
 
-# Esempio d'uso: 
-# Crea un file finto "capitolo1.md" e poi esegui questo script.
+
+def elabora_documento(file_path: str):
+    print(f"🚀 Inizio ingestione: {file_path}")
+
+    testo_completo = _leggi_testo(file_path)
+
+    if not testo_completo.strip():
+        raise ValueError("Il documento è vuoto o non è stato possibile estrarne il testo.")
+
+    db = _chunk_testo(testo_completo)
+
+    if not db:
+        raise ValueError("Nessuna sezione trovata nel documento.")
+
+    os.makedirs(DATA_DIR, exist_ok=True)
+    out_path = os.path.join(DATA_DIR, "source_chunks.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(db, f, indent=2, ensure_ascii=False)
+
+    print(f"🎉 Ingestione completata: {len(db)} sezioni salvate.")
+    return db
+
+
 if __name__ == "__main__":
-    # Assicurati di avere un file .md di test per provare
-    elabora_documento("capitolo1.md")
+    import sys
+    path = sys.argv[1] if len(sys.argv) > 1 else "data/sample_document.md"
+    elabora_documento(path)

@@ -1,12 +1,24 @@
 {
-  "utente": "Studente_Demo",
-  "comportamento": {
-    "time_on_page_medio_sec": 12,
-    "stile_lettura": "frettoloso"
-  },
+  "utente_id": "studente_hackathon",
   "grafo_conoscenza": {
-    "lacune": ["Desirable Difficulties", "Retrieval Practice", "Spaced Repetition"],
-    "concetti_acquisiti": ["Eduslop", "Active Learning"],
-    "livello_stress_cognitivo": "basso"
+    "acquisiti": [
+      "arbitrary",
+      "trajectory"
+    ],
+    "in_corso": [],
+    "lacune": [
+      "Managing an inventory."
+    ]
+  },
+  "persona_comportamentale": {
+    "velocita": "alta",
+    "frizione_preferita": "bilanciata",
+    "dipendenza_aiuti": "alta",
+    "obiettivo": "Ripasso per un esame",
+    "errori_consecutivi": 0
+  },
+  "sessione": {
+    "interazioni_totali": 0,
+    "ultimo_aggiornamento": ""
   }
 }
