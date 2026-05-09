@@ -1,0 +1,12 @@
+{
+  "utente": "Studente_Demo",
+  "comportamento": {
+    "time_on_page_medio_sec": 12,
+    "stile_lettura": "frettoloso"
+  },
+  "grafo_conoscenza": {
+    "lacune": ["Desirable Difficulties", "Retrieval Practice", "Spaced Repetition"],
+    "concetti_acquisiti": ["Eduslop", "Active Learning"],
+    "livello_stress_cognitivo": "basso"
+  }
+}
