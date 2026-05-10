@@ -5,7 +5,6 @@ __pycache__/
 .env
 
 # Node / Frontend
-frontend/
 .DS_Store
 
 backend/gdg26/

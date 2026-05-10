@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────────────────────────
+   Design tokens. Authoritative copy lives here; the Tailwind
+   theme reads the same OKLCH values from tailwind.config.ts.
+   ────────────────────────────────────────────────────────── */
+
+:root {
+  --paper: oklch(0.985 0.005 85);
+  --paper-2: oklch(0.965 0.006 85);
+  --paper-3: oklch(0.94 0.008 85);
+  --ink: oklch(0.20 0.01 270);
+  --ink-2: oklch(0.36 0.01 270);
+  --ink-3: oklch(0.55 0.01 270);
+  --ink-4: oklch(0.74 0.008 270);
+  --rule: oklch(0.90 0.008 270);
+  --rule-2: oklch(0.95 0.005 270);
+
+  --indigo: oklch(0.42 0.13 280);
+  --indigo-2: oklch(0.55 0.14 280);
+  --indigo-soft: oklch(0.96 0.025 280);
+  --indigo-edge: oklch(0.86 0.05 280);
+
+  --amber: oklch(0.62 0.13 70);
+  --amber-soft: oklch(0.965 0.025 80);
+  --amber-edge: oklch(0.88 0.06 75);
+
+  --correct: oklch(0.52 0.10 155);
+  --correct-soft: oklch(0.965 0.025 155);
+  --correct-edge: oklch(0.85 0.05 155);
+  --partial: oklch(0.58 0.13 70);
+  --partial-soft: oklch(0.965 0.025 70);
+  --partial-edge: oklch(0.86 0.06 70);
+  --incorrect: oklch(0.52 0.16 27);
+  --incorrect-soft: oklch(0.965 0.025 27);
+  --incorrect-edge: oklch(0.86 0.06 27);
+  --unsupported: oklch(0.50 0.10 295);
+  --unsupported-soft: oklch(0.965 0.025 295);
+  --unsupported-edge: oklch(0.86 0.06 295);
+}
+
+html, body, #root { height: 100%; }
+html { background: var(--paper-2); }
+body {
+  margin: 0;
+  font-family: '"IBM Plex Sans"', system-ui, sans-serif;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background:
+    radial-gradient(1100px 700px at 80% -10%, oklch(0.97 0.02 280 / 0.5), transparent 60%),
+    radial-gradient(900px 600px at -10% 100%, oklch(0.97 0.02 70 / 0.45), transparent 55%),
+    var(--paper-2);
+}
+
+::selection { background: var(--indigo-soft); color: var(--ink); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: oklch(0.85 0.01 270 / 0.6); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.75 0.015 270 / 0.7); border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Visible focus rings everywhere — accessibility */
+:focus-visible {
+  outline: 2px solid var(--indigo-2);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reusable component tokens */
+@layer components {
+  .label-meta {
+    @apply font-mono uppercase tracking-[0.12em] text-[10.5px] font-medium text-ink-3;
+  }
+  .doc-body p { @apply font-serif text-[17px] leading-[1.62] text-ink mb-4; text-wrap: pretty; }
+  .doc-body h1 { @apply font-serif text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] mb-1.5; }
+  .doc-body h2 { @apply font-serif text-[21px] font-semibold tracking-[-0.01em] mt-9 mb-2.5; }
+  .doc-body h2 .num { @apply font-mono text-ink-4 font-medium mr-2.5 text-[0.78em]; }
+  .doc-body code { @apply font-mono text-[0.86em] px-[5px] py-[1px] bg-paper-3 border border-rule rounded-sm; }
+
+  .btn { @apply inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-rule bg-paper text-ink text-[12.5px] transition-colors hover:bg-paper-3 hover:border-ink-4 disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply bg-ink text-paper border-ink hover:bg-[oklch(0.30_0.015_270)] hover:border-[oklch(0.30_0.015_270)]; }
+  .btn-indigo { @apply bg-indigo text-paper border-indigo hover:bg-indigo-2 hover:border-indigo-2; }
+  .btn-subtle { @apply border-transparent bg-transparent text-ink-3 hover:text-ink hover:bg-paper-3; }
+
+  .answer-box {
+    @apply w-full min-h-[96px] px-3 py-2.5 rounded-md border border-rule bg-paper font-serif text-[15.5px] leading-[1.55] text-ink resize-y transition-colors;
+  }
+  .answer-box:focus { outline: none; border-color: var(--indigo-2); box-shadow: 0 0 0 3px oklch(0.55 0.14 280 / 0.15); }
+  .answer-box::placeholder { color: var(--ink-4); font-style: italic; }
+}
+
+/* Animations */
+@keyframes blockIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-block-in { animation: blockIn 360ms cubic-bezier(.2,.7,.2,1) both; }
+
+@keyframes pulseDot {
+  0%,100% { box-shadow: 0 0 0 0 oklch(0.55 0.14 280 / 0.35); }
+  50%     { box-shadow: 0 0 0 5px oklch(0.55 0.14 280 / 0); }
+}
+.animate-pulse-dot { animation: pulseDot 1.8s ease-in-out infinite; }

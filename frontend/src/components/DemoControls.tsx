@@ -1,0 +1,43 @@
+import type { CheckpointPhase } from '../types';
+
+interface DemoControlsProps {
+  phase: CheckpointPhase | 'setup';
+  onNext: () => void;
+  onBack: () => void;
+  onReset: () => void;
+}
+
+const phaseLabel: Record<DemoControlsProps['phase'], string> = {
+  setup:     'Set up session',
+  reading:   'Reading §4.2',
+  open:      'Open the box',
+  measuring: 'Claim measurement',
+  revising:  'Revising claim',
+  repaired:  'Mistake fossil · recall scheduled',
+};
+
+const ORDER: DemoControlsProps['phase'][] = ['setup','reading','open','measuring','revising','repaired'];
+
+export function DemoControls({ phase, onNext, onBack, onReset }: DemoControlsProps) {
+  const idx = ORDER.indexOf(phase);
+  return (
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-ink/90 text-paper shadow-[0_12px_30px_oklch(0.20_0.01_270/0.25)]">
+      <span className="font-mono text-[10.5px] tracking-[0.1em] text-paper-3">{String(idx+1).padStart(2,'0')} / 06</span>
+      <span className="font-serif text-[14px] font-medium">{phaseLabel[phase]}</span>
+      <div className="flex gap-1">
+        {ORDER.map((p, i) => (
+          <span key={p}
+            className="w-4 h-1 rounded-full transition-colors"
+            style={{
+              background: i === idx ? 'oklch(0.78 0.05 280)'
+                       : i < idx  ? 'oklch(0.55 0.14 280)'
+                                  : 'oklch(0.40 0.01 270)',
+            }} />
+        ))}
+      </div>
+      <button onClick={onBack}  disabled={idx <= 0} className="px-2.5 py-1 rounded-full border border-ink-3 bg-ink-2 text-paper text-[12px] disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Previous step">←</button>
+      <button onClick={onNext}  disabled={idx >= ORDER.length-1} className="px-2.5 py-1 rounded-full border border-indigo bg-indigo text-paper text-[12px] disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Next step">Next →</button>
+      <button onClick={onReset} className="px-2.5 py-1 rounded-full border border-ink-3 bg-ink-2 text-paper text-[12px]" aria-label="Restart demo">↻</button>
+    </div>
+  );
+}
