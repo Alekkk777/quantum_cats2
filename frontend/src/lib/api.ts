@@ -1,21 +1,27 @@
 import type { ClaimReview } from '../types';
 
-const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://127.0.0.1:8000';
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000';
 
 class ApiError extends Error {
-  constructor(message: string, readonly status?: number) { super(message); }
+  constructor(message: string, readonly status?: number) {
+    super(message);
+  }
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
     ...init,
   });
-  if (!res.ok) throw new ApiError(`${path} → ${res.status}`, res.status);
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    const detail = body ? `: ${body.slice(0, 180)}` : '';
+    throw new ApiError(`${path} failed with ${res.status}${detail}`, res.status);
+  }
+
   return (await res.json()) as T;
 }
-
-// ── Quantum Cats / Schrodinger demo endpoints ──────────────────────────────
 
 export async function healthCheck(): Promise<{ ok: boolean }> {
   return request('/health');
@@ -35,15 +41,41 @@ export async function checkClaim(input: {
   question: string;
   answer: string;
   context: string;
-  demo_mode?: boolean;
+  demoMode?: boolean;
+  answerContext?: string | null;
 }): Promise<ClaimReview> {
   return request('/check-claim', {
     method: 'POST',
-    body: JSON.stringify({ demo_mode: false, ...input }),
+    body: JSON.stringify({
+      question: input.question,
+      answer: input.answer,
+      context: input.context,
+      demo_mode: input.demoMode ?? false,
+      answer_context: input.answerContext ?? null,
+    }),
   });
 }
 
-// ── Braynr PACRAR endpoints ────────────────────────────────────────────────
+export async function transcribeAudio(file: Blob): Promise<{
+  text: string;
+  language_code: string | null;
+}> {
+  const form = new FormData();
+  form.append('file', file, 'voice-explanation.webm');
+
+  const res = await fetch(`${API_BASE}/transcribe`, {
+    method: 'POST',
+    body: form,
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    const detail = body ? `: ${body.slice(0, 180)}` : '';
+    throw new ApiError(`/transcribe failed with ${res.status}${detail}`, res.status);
+  }
+
+  return (await res.json()) as { text: string; language_code: string | null };
+}
 
 export interface PlanningQuestion {
   id: string;
@@ -83,8 +115,8 @@ export interface UserBrainState {
 export async function uploadDocument(file: File): Promise<{ status: string; message: string; sezioni: string[] }> {
   const form = new FormData();
   form.append('file', file);
-  const res = await fetch(`${BASE}/api/upload`, { method: 'POST', body: form });
-  if (!res.ok) throw new ApiError(`/api/upload → ${res.status}`, res.status);
+  const res = await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: form });
+  if (!res.ok) throw new ApiError(`/api/upload failed with ${res.status}`, res.status);
   return res.json();
 }
 

@@ -3,25 +3,24 @@ import type { ClaimReview } from '../types';
 import readerMcpFixture from '../data/claimReviewReaderMcp.json';
 import { DEMO_MODE } from '../config';
 
-/**
- * Production-safe wrapper. In DEMO_MODE we still attempt the live call (so the
- * judge can see the network), but on any failure we transparently fall back
- * to the canned ClaimReview fixture so the demo never breaks. Outside demo
- * mode, errors propagate.
- */
 export async function checkClaimWithFallback(input: {
   question: string;
   answer: string;
   context: string;
+  demoMode?: boolean;
+  answerContext?: string | null;
 }): Promise<{ review: ClaimReview; usedFallback: boolean }> {
   try {
-    const review = await checkClaim({ ...input, demo_mode: DEMO_MODE });
+    const review = await checkClaim({
+      question: input.question,
+      answer: input.answer,
+      context: input.context,
+      demoMode: input.demoMode ?? DEMO_MODE,
+      answerContext: input.answerContext,
+    });
     return { review, usedFallback: false };
   } catch (err) {
-    if (DEMO_MODE) {
-      console.warn('[Schrodinger] /check-claim failed, using fixture.', err);
-      return { review: readerMcpFixture as ClaimReview, usedFallback: true };
-    }
-    throw err;
+    console.warn('[Shrodinger] /check-claim failed; using fixture fallback.', err);
+    return { review: readerMcpFixture as ClaimReview, usedFallback: true };
   }
 }

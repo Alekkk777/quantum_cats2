@@ -10,9 +10,9 @@ export function TraceMistakeFossils({ fossils }: { fossils: MistakeFossil[] }) {
           <span className="w-2 h-2 mt-1.5 rounded-full bg-wrong" aria-hidden="true" />
           <span className="font-serif text-[13px] text-ink-2 leading-snug">
             <span className="line-through decoration-wrong/60">"{f.before}"</span>
-            <span className="block mt-0.5 italic text-correct">→ {f.after}</span>
+            <span className="block mt-0.5 italic text-correct">revised: {f.after}</span>
           </span>
-          <span className="font-mono text-[9.5px] text-ink-4 tracking-[0.04em] uppercase">§{f.sectionId}</span>
+          <span className="font-mono text-[9.5px] text-ink-4 tracking-[0.04em] uppercase">{f.sectionId}</span>
         </div>
       ))}
     </TraceSection>

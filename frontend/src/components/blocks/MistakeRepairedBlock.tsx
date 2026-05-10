@@ -13,10 +13,10 @@ export function MistakeRepairedBlock({ before, after }: MistakeRepairedBlockProp
            background: 'linear-gradient(180deg, oklch(0.965 0.025 155) 0%, oklch(0.985 0.005 85) 70%)',
          }}
          data-screen-label="Block: Mistake repaired">
-      <PhaseHead phase="✓  Mistake repaired" meta="fossil saved · concept observed" />
+      <PhaseHead phase="Mistake repaired" meta="fossil saved / concept observed" />
       <div className="block-body">
         <p className="font-serif text-[15.5px] leading-relaxed text-ink-2 m-0">
-          You revised. The new claim is consistent with §4.2 and §4.4. Your understanding of <strong>Reader vs. Resolver</strong> is now <em>observed</em>.
+          You revised. The new claim is consistent with sections 4.2 and 4.4. Your understanding of <strong>Reader vs. Resolver</strong> is now <em>observed</em>.
         </p>
         <div className="mt-2.5 rounded border border-rule overflow-hidden">
           <div className="px-3 py-2.5 font-serif text-[14.5px] leading-relaxed text-ink-2 bg-wrong-soft/60 line-through decoration-wrong/60 decoration-1 border-b border-rule">

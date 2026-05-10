@@ -1,68 +1,121 @@
 import { useState } from 'react';
+import { checkClaimWithFallback } from '../../lib/checkClaimWithFallback';
 import type { Mutazione } from '../../lib/api';
+import type { Claim, ClaimReview } from '../../types';
+import { ClaimMeasurementBlock } from '../blocks/ClaimMeasurementBlock';
+import { OpenTheBoxBlock } from '../blocks/OpenTheBoxBlock';
+
+const TRANSCRIBED_ANSWER_CONTEXT =
+  'This answer includes speech-to-text transcription. Treat odd wording, homophones, punctuation, and small word substitutions as possible transcription artifacts. Judge the student conceptually against the source, and do not over-penalize wording unless it changes the meaning.';
 
 interface ChallengeBlockProps {
   mutazione: Mutazione;
+  context: string;
   onAnswer: (esito: 'superato' | 'fallito') => void;
+  onClaimReview: (review: ClaimReview, usedFallback: boolean) => void;
+  onClaimRepair: (review: ClaimReview, revisedAnswer: string) => void;
+  onChallengeRecorded: (claim: Claim, note: string) => void;
 }
 
-export function ChallengeBlock({ mutazione, onAnswer }: ChallengeBlockProps) {
+export function ChallengeBlock({
+  mutazione,
+  context,
+  onAnswer,
+  onClaimReview,
+  onClaimRepair,
+  onChallengeRecorded,
+}: ChallengeBlockProps) {
   const [answer, setAnswer] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [selfGrade, setSelfGrade] = useState<'superato' | 'fallito' | null>(null);
+  const [answerContext, setAnswerContext] = useState<string | null>(null);
+  const [hintShown, setHintShown] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [review, setReview] = useState<ClaimReview | null>(null);
+  const [isRevising, setIsRevising] = useState(false);
+  const [repaired, setRepaired] = useState(false);
+  const [usedFallback, setUsedFallback] = useState(false);
 
-  const submit = () => {
-    if (!answer.trim()) return;
-    setSubmitted(true);
+  const submit = async () => {
+    if (!answer.trim() || loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await checkClaimWithFallback({
+        question: mutazione.contenuto,
+        answer,
+        context,
+        answerContext,
+      });
+      setReview(result.review);
+      setUsedFallback(result.usedFallback);
+      onClaimReview(result.review, result.usedFallback);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Claim measurement failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const grade = (esito: 'superato' | 'fallito') => {
-    setSelfGrade(esito);
+  const weakClaimCount =
+    review?.claims.filter((claim) =>
+      claim.verdict === 'incorrect' ||
+      claim.verdict === 'unsupported' ||
+      claim.verdict === 'partial',
+    ).length ?? 0;
+
+  const finish = (esito: 'superato' | 'fallito') => {
+    setRepaired(true);
     onAnswer(esito);
   };
 
-  return (
-    <div
-      className="my-4 p-4 rounded-lg border border-amber-edge bg-amber-soft"
-      style={{ animation: 'blockIn 220ms cubic-bezier(.2,.7,.2,1) both' }}
-    >
-      <div className="label-mono text-amber mb-2">⚡ Domanda di applicazione</div>
-      <p className="font-serif text-[15px] text-ink mb-3">{mutazione.contenuto}</p>
+  if (repaired) {
+    return (
+      <div className="my-4 p-3 rounded border border-rule bg-paper-2 font-serif text-[14px] text-ink-2">
+        Measurement recorded. The answer stays available for revision and recall.
+      </div>
+    );
+  }
 
-      {!submitted ? (
-        <div className="flex flex-col gap-2">
-          <textarea
-            className="answer-box min-h-[72px]"
-            placeholder="Scrivi la tua risposta..."
-            value={answer}
-            onChange={e => setAnswer(e.target.value)}
-          />
-          <div className="flex justify-end">
-            <button className="btn btn-indigo" onClick={submit} disabled={!answer.trim()}>
-              Verifica →
-            </button>
+  if (review) {
+    return (
+      <div className="my-4">
+        <ClaimMeasurementBlock
+          review={review}
+          studentAnswer={answer}
+          isRevising={isRevising}
+          onAccept={() => finish(weakClaimCount > 0 ? 'fallito' : 'superato')}
+          onChallenge={onChallengeRecorded}
+          onBeginRevision={() => setIsRevising(true)}
+          onSubmitRevision={(revisedAnswer) => {
+            setAnswer(revisedAnswer);
+            onClaimRepair(review, revisedAnswer);
+            finish('superato');
+          }}
+        />
+        {usedFallback && (
+          <div className="mt-2 font-mono text-[10.5px] text-ink-3 tracking-[0.04em]">
+            demo fallback
           </div>
-        </div>
-      ) : selfGrade === null ? (
-        <div>
-          <div className="p-3 rounded border border-rule bg-paper text-[14px] font-serif text-ink mb-3 whitespace-pre-wrap">
-            {answer}
-          </div>
-          <p className="text-[13px] text-ink-3 mb-2">Come ti sei trovato?</p>
-          <div className="flex gap-2">
-            <button className="btn border-correct text-correct hover:bg-correct-soft" onClick={() => grade('superato')}>
-              ✓ Corretto
-            </button>
-            <button className="btn border-wrong text-wrong hover:bg-wrong-soft" onClick={() => grade('fallito')}>
-              ✗ Da rivedere
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className={`p-3 rounded border text-[14px] font-serif ${selfGrade === 'superato' ? 'border-correct-edge bg-correct-soft text-correct' : 'border-wrong-edge bg-wrong-soft text-wrong'}`}>
-          {selfGrade === 'superato' ? '✓ Ottimo! Concetto acquisito.' : '✗ Aggiunto alle lacune — ripasseremo.'}
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <OpenTheBoxBlock
+      question={mutazione.contenuto}
+      answer={answer}
+      hintShown={hintShown}
+      loading={loading}
+      error={error}
+      onAnswerChange={setAnswer}
+      onVoiceTranscript={(transcript) => {
+        setAnswer((current) => current.trim() ? `${current.trimEnd()}\n\n${transcript}` : transcript);
+        setAnswerContext(TRANSCRIBED_ANSWER_CONTEXT);
+      }}
+      onSubmit={submit}
+      onHint={() => setHintShown(true)}
+      onSkip={() => finish('fallito')}
+    />
   );
 }

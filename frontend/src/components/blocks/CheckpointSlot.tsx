@@ -26,6 +26,17 @@ export function CheckpointSlot({ checkpointId, session, dispatch, onSubmitAnswer
         loading={cp.loading}
         error={cp.error}
         onAnswerChange={(s) => dispatch({ type: 'set-answer', checkpointId, answer: s })}
+        onVoiceTranscript={(transcript) => {
+          const nextAnswer = cp.answer.trim()
+            ? `${cp.answer.trimEnd()}\n\n${transcript}`
+            : transcript;
+          dispatch({
+            type: 'set-answer',
+            checkpointId,
+            answer: nextAnswer,
+            answerContext: 'This answer includes speech-to-text transcription. Treat odd wording, homophones, punctuation, and small word substitutions as possible transcription artifacts. Judge the student conceptually against the source, and do not over-penalize wording unless it changes the meaning.',
+          });
+        }}
         onSubmit={() => onSubmitAnswer(checkpointId)}
         onHint={() => dispatch({ type: 'show-hint', checkpointId })}
         onSkip={() => dispatch({ type: 'open-checkpoint', checkpointId })}
@@ -40,7 +51,7 @@ export function CheckpointSlot({ checkpointId, session, dispatch, onSubmitAnswer
         studentAnswer={cp.answer}
         isRevising={cp.phase === 'revising'}
         onAccept={() => dispatch({ type: 'mark-repaired', checkpointId })}
-        onChallenge={() => { /* logged in component */ }}
+        onChallenge={() => { /* compact challenge is held locally in the measurement block */ }}
         onBeginRevision={() => dispatch({ type: 'begin-revision', checkpointId })}
         onSubmitRevision={(revisedAnswer) => {
           dispatch({ type: 'apply-revision', checkpointId, revisedAnswer });
@@ -51,11 +62,13 @@ export function CheckpointSlot({ checkpointId, session, dispatch, onSubmitAnswer
   }
 
   if (cp.phase === 'repaired' && cp.review) {
-    const incorrect = cp.review.claims.find((c) => c.verdict === 'incorrect');
+    const repairedClaim =
+      cp.review.claims.find((c) => c.severity === 'major' && (c.verdict === 'incorrect' || c.verdict === 'partial')) ??
+      cp.review.claims.find((c) => c.verdict === 'incorrect' || c.verdict === 'partial');
     return (
       <>
         <MistakeRepairedBlock
-          before={incorrect?.text ?? cp.answer}
+          before={repairedClaim?.text ?? cp.answer}
           after={cp.revisedAnswer ?? cp.review.suggested_revision}
         />
         <RecallScheduledBlock

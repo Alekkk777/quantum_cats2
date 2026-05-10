@@ -2,13 +2,11 @@
   "utente_id": "studente_hackathon",
   "grafo_conoscenza": {
     "acquisiti": [
-      "arbitrary",
-      "trajectory"
+      "strange",
+      "physical law"
     ],
     "in_corso": [],
-    "lacune": [
-      "Managing an inventory."
-    ]
+    "lacune": []
   },
   "persona_comportamentale": {
     "velocita": "alta",

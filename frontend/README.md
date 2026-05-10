@@ -1,6 +1,6 @@
-# Schrodinger — React frontend
+# Shrodinger — React frontend
 
-Active-learning study agent. The student reads a document; Schrodinger inserts checkpoints; answers are decomposed into atomic claims; mistakes are preserved as fossils; everything is auditable in the right sidebar.
+Active-learning study agent. The student reads a document; Shrodinger inserts checkpoints; answers are decomposed into atomic claims; mistakes are preserved as fossils; everything is auditable in the right sidebar.
 
 > Open the box of understanding.
 
@@ -48,7 +48,7 @@ react-app/
       demoSession.ts        ← starting StudySession
       claimReviewReaderMcp.json   ← canned ClaimReview for the Reader/MCP demo
     components/
-      Mascot.tsx            ← Schrodinger SVG (head + collar + box charm)
+      Mascot.tsx            ← Shrodinger SVG (head + collar + box charm)
       TopBar.tsx
       SetupOverlay.tsx
       DemoControls.tsx

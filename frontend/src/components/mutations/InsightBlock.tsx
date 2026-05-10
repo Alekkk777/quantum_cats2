@@ -23,7 +23,7 @@ export function InsightBlock({ target, contenuto, tipo }: InsightBlockProps) {
           style={{ animation: 'blockIn 220ms cubic-bezier(.2,.7,.2,1) both' }}
         >
           <span className="label-mono text-indigo block mb-1">
-            {tipo === 'insight' ? '💡 Insight' : '↔ Confronto'}
+            {tipo === 'insight' ? 'Insight' : 'Compare'}
           </span>
           {contenuto}
         </span>

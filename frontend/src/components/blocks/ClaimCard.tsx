@@ -1,10 +1,10 @@
 import type { Claim, Verdict } from '../../types';
 
 const verdictStyles: Record<Verdict, { mark: string; chip: string; ariaWord: string; markGlyph: string }> = {
-  correct:     { mark: 'bg-correct',     chip: 'text-correct',     ariaWord: 'correct',                    markGlyph: '✓' },
-  partial:     { mark: 'bg-partial',     chip: 'text-partial',     ariaWord: 'partially correct',          markGlyph: '~' },
-  incorrect:   { mark: 'bg-incorrect',   chip: 'text-incorrect',   ariaWord: 'incorrect',                  markGlyph: '×' },
-  unsupported: { mark: 'bg-unsupported', chip: 'text-unsupported', ariaWord: 'unsupported by source',      markGlyph: '?' },
+  correct: { mark: 'bg-correct', chip: 'text-correct', ariaWord: 'correct', markGlyph: 'OK' },
+  partial: { mark: 'bg-partial', chip: 'text-partial', ariaWord: 'partially correct', markGlyph: '~' },
+  incorrect: { mark: 'bg-wrong', chip: 'text-wrong', ariaWord: 'incorrect', markGlyph: 'X' },
+  unsupported: { mark: 'bg-unsup', chip: 'text-unsup', ariaWord: 'unsupported by source', markGlyph: '?' },
 };
 
 const verdictLabel: Record<Verdict, string> = {
@@ -32,7 +32,7 @@ export function ClaimCard({ claim }: { claim: Claim }) {
           <span className="font-serif text-[15px] font-medium leading-tight text-ink">"{claim.text}"</span>
           <span className={`font-mono text-[10px] uppercase tracking-wider font-semibold ${v.chip}`}>
             {verdictLabel[claim.verdict]}
-            {claim.severity === 'major' && claim.verdict === 'incorrect' && <> · {claim.label}</>}
+            {claim.severity === 'major' && claim.verdict === 'incorrect' && <> / {claim.label}</>}
           </span>
         </div>
         <div className="font-serif text-[14px] text-ink-2 leading-[1.5]" style={{ textWrap: 'pretty' }}>
@@ -44,7 +44,7 @@ export function ClaimCard({ claim }: { claim: Claim }) {
           )}
           {claim.source_span && (
             <span className="mt-1.5 inline-block font-mono text-[10.5px] text-ink-3 tracking-wide">
-              §{claim.source_span.section_id} — "{claim.source_span.quote}"
+              {claim.source_span.section_id}: "{claim.source_span.quote}"
             </span>
           )}
         </div>

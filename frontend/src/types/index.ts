@@ -42,12 +42,14 @@ export interface CheckpointState {
   sectionId: string;
   question: string;
   answer: string;
+  answerContext: string | null;
   hintShown: boolean;
   review: ClaimReview | null;
   revisedAnswer: string | null;
   phase: CheckpointPhase;
   loading: boolean;
   error: string | null;
+  usedFallback: boolean;
 }
 
 export interface MistakeFossil {

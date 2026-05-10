@@ -1,4 +1,5 @@
 import type { Mutazione } from '../lib/api';
+import type { Claim, ClaimReview } from '../types';
 import { ClozeWord } from './mutations/ClozeWord';
 import { InsightBlock } from './mutations/InsightBlock';
 import { ChallengeBlock } from './mutations/ChallengeBlock';
@@ -8,13 +9,24 @@ interface LiveDocumentProps {
   testo: string;
   mutazioni: Mutazione[];
   onInteraction: (concetto: string, esito: 'superato' | 'fallito') => void;
+  onClaimReview: (review: ClaimReview, usedFallback: boolean) => void;
+  onClaimRepair: (review: ClaimReview, revisedAnswer: string) => void;
+  onChallengeRecorded: (claim: Claim, note: string) => void;
 }
 
-export function LiveDocument({ sectionId, testo, mutazioni, onInteraction }: LiveDocumentProps) {
+export function LiveDocument({
+  sectionId,
+  testo,
+  mutazioni,
+  onInteraction,
+  onClaimReview,
+  onClaimRepair,
+  onChallengeRecorded,
+}: LiveDocumentProps) {
   const paragraphs = testo.split(/\n\n+/).filter(p => p.trim());
 
   return (
-    <article className="doc-prose max-w-[740px] mx-auto px-8 py-10">
+    <article className="doc-prose max-w-[var(--doc-col)] mx-auto px-8 pt-10 pb-56" data-screen-label="Document">
       <div className="label-mono text-indigo mb-6">{sectionId.replace('_', ' ').toUpperCase()}</div>
       {paragraphs.map((para, i) => (
         <AnnotatedParagraph
@@ -22,6 +34,9 @@ export function LiveDocument({ sectionId, testo, mutazioni, onInteraction }: Liv
           text={para}
           mutazioni={mutazioni}
           onInteraction={onInteraction}
+          onClaimReview={onClaimReview}
+          onClaimRepair={onClaimRepair}
+          onChallengeRecorded={onChallengeRecorded}
         />
       ))}
     </article>
@@ -32,10 +47,16 @@ function AnnotatedParagraph({
   text,
   mutazioni,
   onInteraction,
+  onClaimReview,
+  onClaimRepair,
+  onChallengeRecorded,
 }: {
   text: string;
   mutazioni: Mutazione[];
   onInteraction: (concetto: string, esito: 'superato' | 'fallito') => void;
+  onClaimReview: (review: ClaimReview, usedFallback: boolean) => void;
+  onClaimRepair: (review: ClaimReview, revisedAnswer: string) => void;
+  onChallengeRecorded: (claim: Claim, note: string) => void;
 }) {
   // Heading detection
   if (text.startsWith('## ') || text.startsWith('### ')) {
@@ -64,7 +85,11 @@ function AnnotatedParagraph({
       {challengeMut && (
         <ChallengeBlock
           mutazione={challengeMut}
+          context={text}
           onAnswer={esito => onInteraction(challengeMut.target, esito)}
+          onClaimReview={onClaimReview}
+          onClaimRepair={onClaimRepair}
+          onChallengeRecorded={onChallengeRecorded}
         />
       )}
     </>

@@ -24,8 +24,8 @@ export default function App() {
   return (
     <>
       <TopBar
-        documentTitle={docName || 'Braynr · Studio Adattivo'}
-        chapterCrumb={phase === 'studying' ? `${sezioni.length} sezioni` : ''}
+        documentTitle={docName || 'Shrodinger Study'}
+        chapterCrumb={phase === 'studying' ? `${sezioni.length} sections` : ''}
         status={phase === 'studying' ? 'studying' : 'idle'}
         onExportTrace={() => alert('Trace exported as JSON.')}
         onSaveSession={() => alert('Session saved.')}

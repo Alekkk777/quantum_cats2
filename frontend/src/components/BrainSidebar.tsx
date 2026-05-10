@@ -14,7 +14,7 @@ export function BrainSidebar({ brain, sezioni, currentSection, onSelectSection }
   return (
     <aside className="h-full border-l border-rule bg-paper flex flex-col overflow-y-auto">
       <div className="px-5 py-4 border-b border-rule">
-        <div className="label-mono mb-2">Grafo della Conoscenza</div>
+        <div className="label-mono mb-2">Knowledge graph</div>
         <div className="flex items-center gap-2 mb-1">
           <div className="flex-1 h-1.5 rounded-full bg-rule overflow-hidden">
             <div

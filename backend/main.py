@@ -2,6 +2,9 @@ import os
 import shutil
 import json
 import uvicorn
+from io import BytesIO
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -13,12 +16,18 @@ from mcp_tools import (
     recupera_chunk_vettoriale,
     lista_sezioni,
 )
-from orchestrator import genera_documento_vivente, genera_domande_pianificazione
-from make_questions_mcp import check_claim as _check_claim_tool, generate_question as _gen_question_tool
+from orchestrator import (
+    controlla_claim_checkpoint,
+    genera_documento_vivente,
+    genera_domanda_checkpoint,
+    genera_domande_pianificazione,
+)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
-app = FastAPI(title="Braynr / Schrodinger Study Companion API")
+load_dotenv()
+
+app = FastAPI(title="Braynr / Shrodinger Study Companion API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -53,6 +62,11 @@ class CheckClaimRequest(BaseModel):
     answer: str
     context: str
     demo_mode: bool = False
+    answer_context: str | None = None
+
+class TranscribeResponse(BaseModel):
+    text: str
+    language_code: str | None = None
 
 
 # ── Core endpoints ─────────────────────────────────────────────────────────
@@ -169,24 +183,61 @@ async def handle_user_interaction(request: InteractionRequest):
     }
 
 
-# ── Quantum Cats / Schrodinger endpoints (usati dal frontend demo) ─────────
+# ── Quantum Cats / Shrodinger endpoints (usati dal frontend demo) ─────────
 
 @app.post("/generate-question")
 async def generate_question_endpoint(req: GenerateQuestionRequest):
     """Genera una domanda checkpoint per il documento corrente."""
-    result = _gen_question_tool.invoke({"topic": req.topic, "context": req.context})
+    result = genera_domanda_checkpoint(topic=req.topic, context=req.context)
     return {"question": result}
 
 
 @app.post("/check-claim")
 async def check_claim_endpoint(req: CheckClaimRequest):
     """Valuta le claim della risposta dello studente."""
-    result_json = _check_claim_tool.invoke({
-        "question": req.question,
-        "answer": req.answer,
-        "context": req.context,
-    })
-    return json.loads(result_json)
+    return controlla_claim_checkpoint(
+        question=req.question,
+        answer=req.answer,
+        context=req.context,
+        demo_mode=req.demo_mode,
+        answer_context=req.answer_context,
+    )
+
+
+@app.post("/transcribe", response_model=TranscribeResponse)
+async def transcribe(file: UploadFile = File(...)):
+    api_key = os.getenv("ELEVENLABS_API_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="ELEVENLABS_API_KEY is not configured on the backend.",
+        )
+
+    audio_bytes = await file.read()
+    if not audio_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded audio file is empty.")
+
+    try:
+        from elevenlabs.client import ElevenLabs
+
+        client = ElevenLabs(api_key=api_key)
+        transcription = client.speech_to_text.convert(
+            file=BytesIO(audio_bytes),
+            model_id="scribe_v2",
+            tag_audio_events=False,
+            language_code="eng",
+            diarize=False,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"ElevenLabs transcription failed: {type(exc).__name__}",
+        ) from exc
+
+    return {
+        "text": transcription.text,
+        "language_code": transcription.language_code or None,
+    }
 
 
 if __name__ == "__main__":

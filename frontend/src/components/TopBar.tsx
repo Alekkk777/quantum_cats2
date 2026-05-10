@@ -10,7 +10,7 @@ interface TopBarProps {
 
 const statusLabel: Record<TopBarProps['status'], string> = {
   idle: 'NOT STARTED',
-  studying: 'STUDY MODE · OBSERVING',
+  studying: 'STUDY MODE - OBSERVING',
   measuring: 'MEASURING UNDERSTANDING',
 };
 
@@ -22,7 +22,7 @@ export function TopBar({ documentTitle, chapterCrumb, status, onExportTrace, onS
     >
       <div className="flex items-center gap-2.5 font-serif font-semibold text-[17px] -tracking-[0.01em]">
         <Mascot size={32} variant="full" />
-        <span>Schrodinger</span>
+        <span>Shrodinger</span>
         <span className="ml-2 font-mono text-[10px] tracking-[0.16em] uppercase text-ink-3 font-medium">by Quantum Cats</span>
       </div>
       <div className="w-px h-6 bg-rule" />

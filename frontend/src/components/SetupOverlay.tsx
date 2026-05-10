@@ -8,9 +8,9 @@ interface SetupOverlayProps {
 }
 
 const docs: Array<[string, string, string]> = [
-  ['agent-arch', 'Agent Architectures, Ch. 4', 'Reader · Resolver · MCP · 12 pp'],
-  ['linalg',     'Linear Algebra Done Right, Ch. 5', 'Eigenvalues · 18 pp'],
-  ['biochem',    'Lehninger Biochemistry, §14', 'Glycolysis · 22 pp'],
+  ['agent-arch', 'Agent Architectures, Ch. 4', 'Reader / Resolver / MCP / 12 pp'],
+  ['linalg', 'Linear Algebra Done Right, Ch. 5', 'Eigenvalues / 18 pp'],
+  ['biochem', 'Lehninger Biochemistry, Ch. 14', 'Glycolysis / 22 pp'],
 ];
 
 const goals: Array<[StudySession['goal'], string]> = [
@@ -21,9 +21,9 @@ const goals: Array<[StudySession['goal'], string]> = [
 ];
 
 const depths: Array<[StudySession['depth'], string]> = [
-  ['light',    'Light — 1 checkpoint / page'],
-  ['rigorous', 'Rigorous — checkpoints at every fragile concept'],
-  ['oral',     'Oral defense — explain everything'],
+  ['light', 'Light - 1 checkpoint / page'],
+  ['rigorous', 'Rigorous - checkpoints at every fragile concept'],
+  ['oral', 'Oral defense - explain everything'],
 ];
 
 export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
@@ -44,7 +44,7 @@ export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
             <div className="label-mono text-indigo">Open the box of understanding</div>
             <h2 className="font-serif text-[26px] font-semibold -tracking-[0.015em] mt-1">Set up this study session.</h2>
             <p className="font-serif text-[15px] text-ink-2 leading-snug mt-1">
-              Schrodinger doesn't summarize for you — it inserts checkpoints into your document so your understanding becomes <em>observable</em>.
+              Shrodinger does not summarize for you. It inserts checkpoints into your document so your understanding becomes <em>observable</em>.
             </p>
           </div>
         </div>
@@ -76,7 +76,7 @@ export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
 
         <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-rule">
           <span className="font-serif italic text-[13px] text-ink-3">Until you use it, your understanding is unobserved.</span>
-          <button className="btn btn-indigo" onClick={() => onStart({ goal, depth, doc })}>Begin study mode →</button>
+          <button className="btn btn-indigo" onClick={() => onStart({ goal, depth, doc })}>Begin study mode</button>
         </div>
       </div>
     </div>

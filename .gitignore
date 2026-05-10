@@ -1,13 +1,23 @@
 # Python
 backend/venv/
-__pycache__/
-*.pyc
-.env
-
-# Node / Frontend
-.DS_Store
-
 backend/gdg26/
 __pycache__/
 *.pyc
 .env
+
+# Backend secrets
+backend/.env
+
+# Canonical frontend
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+frontend/.env
+frontend/.env.*
+
+# Stale frontend artifact
+react-app/
+.npm-cache/
+
+# OS/editor
+.DS_Store

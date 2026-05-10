@@ -12,7 +12,7 @@ export function RevisionBox({ suggested, onSubmit }: RevisionBoxProps) {
 
   return (
     <div className="mt-3.5 rounded-md border border-correct-edge bg-correct-soft/50 p-3">
-      <div className="label-mono mb-1.5 text-correct">Suggested revision · edit before accepting</div>
+      <div className="label-mono mb-1.5 text-correct">Suggested revision / edit before accepting</div>
       <textarea
         ref={ref}
         aria-label="Revised answer"
@@ -21,7 +21,7 @@ export function RevisionBox({ suggested, onSubmit }: RevisionBoxProps) {
         onChange={(e) => setText(e.target.value)}
       />
       <div className="flex gap-2 mt-2.5">
-        <button className="btn btn-primary" onClick={() => onSubmit(text)}>Accept revision →</button>
+        <button className="btn btn-primary" onClick={() => onSubmit(text)}>Accept revision</button>
         <button className="btn" onClick={() => setText(suggested)}>Restore suggestion</button>
       </div>
     </div>

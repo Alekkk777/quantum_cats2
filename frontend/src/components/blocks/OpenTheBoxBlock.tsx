@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { PhaseHead } from './PhaseHead';
+import { VoiceExplainButton } from './VoiceExplainButton';
 import { BoxGlyph } from '../Mascot';
 
 interface OpenTheBoxBlockProps {
@@ -9,6 +10,7 @@ interface OpenTheBoxBlockProps {
   loading: boolean;
   error: string | null;
   onAnswerChange: (s: string) => void;
+  onVoiceTranscript: (s: string) => void;
   onSubmit: () => void;
   onHint: () => void;
   onSkip: () => void;
@@ -28,23 +30,27 @@ export function OpenTheBoxBlock(p: OpenTheBoxBlockProps) {
       }}
       data-screen-label="Block: Open the box"
     >
-      <PhaseHead phase="□  Open the box" meta="checkpoint · ~60s" />
+      <PhaseHead phase="Open the box" meta="checkpoint - ~60s" />
       <div className="block-body">
         <h3 className="font-serif text-[17px] font-semibold leading-tight mb-1.5 flex items-baseline gap-2">
           <BoxGlyph color="oklch(0.55 0.14 280)" />
           {p.question}
         </h3>
         <p className="font-serif text-[15.5px] leading-relaxed text-ink-2">
-          Explain it in your own words. Don't paraphrase the paragraph above — explain the <em>why</em>. Two or three sentences is enough.
+          Explain it in your own words. Do not paraphrase the paragraph above; explain the <em>why</em>. Two or three sentences is enough.
         </p>
         <textarea
           ref={ref}
           aria-label="Your understanding"
           className="w-full min-h-[96px] mt-1 px-3 py-2.5 rounded-md border border-rule bg-paper font-serif text-[15.5px] leading-relaxed text-ink resize-y placeholder:italic placeholder:text-ink-4 focus:outline-none focus:border-indigo-2 focus:shadow-[0_0_0_3px_oklch(0.55_0.14_280/0.15)]"
-          placeholder="Understanding is hidden until you use it…"
+          placeholder="Understanding is hidden until you use it..."
           value={p.answer}
           onChange={(e) => p.onAnswerChange(e.target.value)}
           disabled={p.loading}
+        />
+        <VoiceExplainButton
+          disabled={p.loading}
+          onTranscript={p.onVoiceTranscript}
         />
         {p.hintShown && (
           <div className="mt-3 px-2.5 py-2 rounded border border-dashed border-amber-edge bg-amber-soft/70 font-serif text-[13.5px] text-ink-2 leading-relaxed">
@@ -53,12 +59,12 @@ export function OpenTheBoxBlock(p: OpenTheBoxBlockProps) {
         )}
         {p.error && (
           <div className="mt-3 px-2.5 py-2 rounded border border-wrong-edge bg-wrong-soft font-mono text-[11.5px] text-wrong">
-            /check-claim failed — {p.error}
+            Claim measurement could not complete: {p.error}
           </div>
         )}
         <div className="flex flex-wrap items-center gap-2 mt-3">
           <button className="btn btn-indigo" onClick={p.onSubmit} disabled={!canSubmit}>
-            {p.loading ? 'Measuring…' : 'Submit understanding →'}
+            {p.loading ? 'measuring claims...' : 'Submit understanding'}
           </button>
           <button className="btn" onClick={p.onHint} disabled={p.loading}>Tiny hint</button>
           <button className="btn btn-subtle" onClick={p.onSkip} disabled={p.loading}>Skip, but mark fragile</button>

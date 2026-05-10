@@ -7,7 +7,7 @@ export function TraceNowReading({ concept }: { concept: ConceptSnapshot }) {
       <div className="rounded-md border border-rule bg-paper px-3 py-2.5">
         <div className="font-serif text-[15px] font-semibold leading-tight">{concept.title}</div>
         <div className="font-mono text-[10.5px] text-ink-3 mt-0.5 tracking-[0.04em]">
-          {concept.fragility} · {concept.strength >= 70 ? 'observed' : 'observing'}
+          {concept.fragility} - {concept.strength >= 70 ? 'observed' : 'observing'}
         </div>
         <div className="mt-2.5 h-1 rounded-full bg-paper-3 overflow-hidden">
           <span

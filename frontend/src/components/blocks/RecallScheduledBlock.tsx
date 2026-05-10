@@ -9,7 +9,7 @@ export function RecallScheduledBlock({ recall, prompt, onContinue }: { recall: R
            background: 'linear-gradient(180deg, oklch(0.965 0.025 80) 0%, oklch(0.985 0.005 85) 70%)',
          }}
          data-screen-label="Block: Recall scheduled">
-      <PhaseHead phase="↻  Recall scheduled" meta={recall.map((r) => r.scheduledFor).join(' · ')} />
+      <PhaseHead phase="Recall scheduled" meta={recall.map((r) => r.scheduledFor).join(' / ')} />
       <div className="block-body">
         <p className="font-serif text-[15.5px] leading-relaxed text-ink-2 m-0">
           {prompt}
@@ -23,7 +23,7 @@ export function RecallScheduledBlock({ recall, prompt, onContinue }: { recall: R
           ))}
         </ul>
         <div className="flex gap-2 mt-3">
-          <button className="btn" onClick={onContinue}>Continue reading →</button>
+          <button className="btn" onClick={onContinue}>Continue reading</button>
         </div>
       </div>
     </div>

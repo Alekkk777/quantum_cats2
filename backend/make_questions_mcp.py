@@ -218,13 +218,23 @@ Source context:
 
 
 @tool
-def check_claim(question: str, answer: str, context: str) -> str:
+def check_claim(question: str, answer: str, context: str, answer_context: Optional[str] = None) -> str:
     """
     Extract atomic claims from the student's answer and review each claim against the source context.
 
     Returns:
         JSON string matching the ClaimReview schema.
     """
+    answer_context_block = f"""
+Additional answer context:
+{answer_context}
+
+Use this only to calibrate judgment. If the answer was transcribed from speech,
+treat odd wording, homophones, punctuation, or small word substitutions as possible
+transcription artifacts. Still extract and judge the student's conceptual claims
+against the source context; do not invent intent or ignore a clear misconception.
+""".strip() if answer_context else "Additional answer context: none."
+
     prompt = f"""
 You are Shrodinger, an active-learning agent embedded inside a study document.
 
@@ -275,6 +285,8 @@ Question:
 
 Student answer:
 {answer}
+
+{answer_context_block}
 
 Source context:
 {context}

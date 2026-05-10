@@ -1,5 +1,5 @@
 /**
- * Schrodinger — the mascot. Refined from the draft:
+ * Shrodinger — the mascot. Refined from the draft:
  * - Cleaner geometry (face built from primitives, not bezier overload)
  * - Quantum collar replaces the cluttered atom; box-glyph charm
  * - Pupils animate between two superposed positions on hover (observation)
@@ -29,7 +29,7 @@ export function Mascot({ size = 56, observed, variant = 'full', className, ...re
       onMouseEnter={() => setIsObs(true)}
       onMouseLeave={() => setIsObs(false)}
       role="img"
-      aria-label="Schrodinger"
+      aria-label="Shrodinger"
       {...rest}
     >
       <defs>

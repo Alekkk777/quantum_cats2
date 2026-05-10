@@ -9,7 +9,7 @@ interface PlanningPhaseProps {
 
 export function PlanningPhase({ onComplete }: PlanningPhaseProps) {
   const [domande, setDomande] = useState<PlanningQuestion[]>([]);
-  const [titolo, setTitolo] = useState('Impostazioni sessione...');
+  const [titolo, setTitolo] = useState('Session setup...');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,7 +53,7 @@ export function PlanningPhase({ onComplete }: PlanningPhaseProps) {
       <div className="fixed inset-0 z-50 grid place-items-center bg-paper-2">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-indigo border-t-transparent rounded-full animate-spin" />
-          <span className="font-mono text-[12px] text-indigo">Preparando le domande...</span>
+          <span className="font-mono text-[12px] text-indigo">Preparing setup questions...</span>
         </div>
       </div>
     );
@@ -68,10 +68,10 @@ export function PlanningPhase({ onComplete }: PlanningPhaseProps) {
         <div className="flex items-start gap-3 mb-5">
           <Mascot size={56} variant="full" />
           <div>
-            <div className="label-mono text-indigo">Pianificazione</div>
+            <div className="label-mono text-indigo">Planning</div>
             <h2 className="font-serif text-[24px] font-semibold tracking-[-0.015em] mt-1">{titolo}</h2>
             <p className="font-serif text-[14px] text-ink-2 leading-snug mt-1">
-              Mentre il documento viene processato, dimmi come posso aiutarti meglio.
+              Tell Shrodinger how much friction to add while you study.
             </p>
           </div>
         </div>
@@ -107,14 +107,14 @@ export function PlanningPhase({ onComplete }: PlanningPhaseProps) {
 
         <div className="flex items-center justify-between gap-3 mt-5 pt-4 border-t border-rule">
           <span className="font-serif italic text-[13px] text-ink-3">
-            Il tuo profilo cognitivo guiderà le mutazioni del documento.
+            Your profile guides the document interventions.
           </span>
           <button
             className="btn btn-indigo"
             onClick={submit}
             disabled={!allAnswered || saving}
           >
-            {saving ? 'Salvataggio...' : 'Inizia lo studio →'}
+            {saving ? 'Saving...' : 'Begin study mode'}
           </button>
         </div>
       </div>

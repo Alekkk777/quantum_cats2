@@ -19,7 +19,7 @@ export function UploadPhase({ onUploaded }: UploadPhaseProps) {
       const res = await uploadDocument(file);
       onUploaded(res.sezioni, file.name);
     } catch (err) {
-      setError((err as Error).message ?? 'Upload fallito. Il backend è avviato?');
+      setError((err as Error).message ?? 'Upload failed. Is the backend running?');
     } finally {
       setLoading(false);
     }
@@ -43,12 +43,12 @@ export function UploadPhase({ onUploaded }: UploadPhaseProps) {
         <div className="flex items-start gap-3">
           <Mascot size={56} variant="full" />
           <div>
-            <div className="label-mono text-indigo">Braynr · Studio Adattivo</div>
+            <div className="label-mono text-indigo">Shrodinger by Quantum Cats</div>
             <h1 className="font-serif text-[28px] font-semibold tracking-[-0.015em] mt-0.5">
-              Carica il tuo documento.
+              Upload your source document.
             </h1>
             <p className="font-serif text-[15px] text-ink-2 leading-snug mt-1">
-              Trasforma qualsiasi PDF o Markdown in un documento vivente con frizione cognitiva adattiva.
+              Shrodinger keeps the document central, then inserts quiet checkpoints where understanding should become observable.
             </p>
           </div>
         </div>
@@ -74,7 +74,7 @@ export function UploadPhase({ onUploaded }: UploadPhaseProps) {
           {loading ? (
             <>
               <div className="w-8 h-8 border-2 border-indigo border-t-transparent rounded-full animate-spin" />
-              <span className="font-mono text-[12px] text-indigo">Ingestione in corso...</span>
+              <span className="font-mono text-[12px] text-indigo">Reading the document...</span>
             </>
           ) : (
             <>
@@ -82,10 +82,10 @@ export function UploadPhase({ onUploaded }: UploadPhaseProps) {
                 <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4M8 8l4-4 4 4" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               <div className="text-center">
-                <p className="font-serif text-[15px] text-ink">Trascina qui il documento</p>
-                <p className="text-[12px] text-ink-4 font-mono mt-0.5">.md · .pdf · .txt</p>
+                <p className="font-serif text-[15px] text-ink">Drop the document here</p>
+                <p className="text-[12px] text-ink-4 font-mono mt-0.5">.md / .pdf / .txt</p>
               </div>
-              <span className="text-[11px] text-ink-4">oppure clicca per selezionare</span>
+              <span className="text-[11px] text-ink-4">or click to choose a file</span>
             </>
           )}
         </div>
@@ -97,7 +97,7 @@ export function UploadPhase({ onUploaded }: UploadPhaseProps) {
         )}
 
         <p className="text-[12px] text-ink-4 font-mono text-center">
-          Il documento viene processato localmente — nessun dato inviato al cloud.
+          Your backend ingests the document and prepares the study path.
         </p>
       </div>
     </div>
