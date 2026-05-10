@@ -18,7 +18,7 @@ export function DebateThread({ claimLabel, entries, loading, maxRounds = 3, onSu
   return (
     <div className="mt-2.5 ml-[28px] flex flex-col gap-1.5" data-screen-label="Debate thread">
       <div className="font-mono text-[9.5px] tracking-[0.1em] uppercase text-ink-4 mb-0.5">
-        Debate — {claimLabel}
+        Debate - {claimLabel}
       </div>
 
       {entries.map((entry, i) => (
@@ -35,7 +35,7 @@ export function DebateThread({ claimLabel, entries, loading, maxRounds = 3, onSu
               entry.role === 'student' ? 'text-ink-4' : 'text-indigo'
             }`}
           >
-            {entry.role === 'student' ? 'You' : 'Schrödinger'}
+            {entry.role === 'student' ? 'You' : 'Shrodinger'}
           </span>
           {entry.text}
         </div>
@@ -43,7 +43,7 @@ export function DebateThread({ claimLabel, entries, loading, maxRounds = 3, onSu
 
       {loading && (
         <div className="border border-indigo-edge bg-indigo-soft rounded px-3 py-2 font-mono text-[10.5px] text-indigo tracking-[0.06em] animate-pulse">
-          Schrödinger is thinking…
+          Shrodinger is thinking...
         </div>
       )}
 
@@ -51,7 +51,7 @@ export function DebateThread({ claimLabel, entries, loading, maxRounds = 3, onSu
         <div className="ml-5 mt-1">
           <textarea
             className="w-full min-h-[56px] px-2.5 py-2 rounded border border-rule bg-paper font-serif text-[13.5px] text-ink resize-y placeholder:italic placeholder:text-ink-4 focus:outline-none focus:border-indigo-2"
-            placeholder="Reply to Schrödinger…"
+            placeholder="Reply to Shrodinger..."
             value={reply}
             onChange={(e) => setReply(e.target.value)}
           />

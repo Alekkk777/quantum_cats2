@@ -60,39 +60,39 @@ def controlla_claim_checkpoint(
 
     return review.model_dump()
 
+
 def genera_domande_pianificazione():
     """
-    Called by React as soon as the user uploads the PDF.
-    Keeps the user engaged while the backend is chunking,
-    and provides data to build the "Persona" profile.
+    Called by React while the user configures the session.
+    Keeps the user engaged and builds the persona profile.
     """
     return {
         "fase": "Planning",
-        "titolo_ui": "Setting up your Study Engine...",
+        "titolo_ui": "Set up your study session",
         "domande": [
             {
                 "id": "q1_obiettivo",
                 "testo": "What is your goal with this document?",
-                "opzioni": ["Review for an exam", "First exploratory read", "Look up specific concepts"]
+                "opzioni": ["Review for an exam", "First exploratory read", "Look up specific concepts"],
             },
             {
                 "id": "q2_tempo",
                 "testo": "How much time do you have today?",
-                "opzioni": ["Short (I'm in a hurry)", "Enough (30-60 min)", "Plenty (I want to go deep)"]
+                "opzioni": ["Short - I am in a hurry", "Enough - 30 to 60 minutes", "Plenty - I want to go deep"],
             },
             {
                 "id": "q3_conoscenza_pregressa",
-                "testo": "How would you rate your current preparation on these topics?",
-                "opzioni": ["Starting from scratch", "I have some background", "I'm an expert — challenge me"]
-            }
-        ]
+                "testo": "How much background do you already have?",
+                "opzioni": ["Starting from scratch", "I have some background", "I'm confident - challenge me"],
+            },
+        ],
     }
 
 
 def applica_matrice_cognitiva(tutte_le_mutazioni, profilo):
     """
-    Decide quali mutazioni tenere in base al comportamento (Persona)
-    e alle conoscenze (Grafo). Restituisce fino a 4 mutazioni bilanciate.
+    Decide which mutations to keep based on persona and knowledge graph.
+    Returns up to 4 balanced mutations.
     """
     if not tutte_le_mutazioni:
         return []
@@ -104,38 +104,32 @@ def applica_matrice_cognitiva(tutte_le_mutazioni, profilo):
     velocita = persona.get("velocita", "media")
     dipendenza = persona.get("dipendenza_aiuti", "alta")
 
-    # Priorità: lacune note → sempre incluse
     lacune_mut = [m for m in tutte_le_mutazioni if m.get("target") in lacune]
 
     if velocita == "alta":
-        # In fretta: solo challenge rapidi
         frizione_mut = [m for m in tutte_le_mutazioni if m.get("tipo_ui") in ("cloze", "domanda_inline")]
         support_mut = []
     elif frizione == "alta":
-        # Esperto: privilegia sfida e confronto
         frizione_mut = [m for m in tutte_le_mutazioni if m.get("tipo_ui") in ("domanda_inline", "confronto")]
         support_mut = [m for m in tutte_le_mutazioni if m.get("tipo_ui") == "insight"]
     else:
-        # Bilanciato: prende tutto
         frizione_mut = [m for m in tutte_le_mutazioni if m.get("tipo_ui") in ("cloze", "domanda_inline")]
         support_mut = [m for m in tutte_le_mutazioni if m.get("tipo_ui") in ("insight", "confronto")]
 
     support_limit = 2 if dipendenza == "alta" else 1
 
-    # Deduplication via object identity
     seen = set()
     selected = []
-    for m in lacune_mut + frizione_mut + support_mut[:support_limit]:
-        if id(m) not in seen:
-            seen.add(id(m))
-            selected.append(m)
+    for mutation in lacune_mut + frizione_mut + support_mut[:support_limit]:
+        if id(mutation) not in seen:
+            seen.add(id(mutation))
+            selected.append(mutation)
 
-    # Fallback: garantisci almeno 2 mutazioni
     if len(selected) < 2:
-        for m in tutte_le_mutazioni:
-            if id(m) not in seen:
-                seen.add(id(m))
-                selected.append(m)
+        for mutation in tutte_le_mutazioni:
+            if id(mutation) not in seen:
+                seen.add(id(mutation))
+                selected.append(mutation)
             if len(selected) >= 2:
                 break
 
@@ -144,17 +138,14 @@ def applica_matrice_cognitiva(tutte_le_mutazioni, profilo):
 
 async def genera_documento_vivente(sezione_id: str, testo_chunk: str, profilo: dict):
     """
-    L'orchestratore in azione: lancia i tool in parallelo e applica il filtro.
+    Run both mutation agents in parallel and apply the cognitive matrix.
     """
     lacune = profilo.get("grafo_conoscenza", {}).get("lacune", [])
 
     risultati = await asyncio.gather(
         tool_agente_inquisitore(testo_chunk, lacune),
-        tool_agente_mentore(testo_chunk)
+        tool_agente_mentore(testo_chunk),
     )
 
     tutte_mutazioni = [item for sublist in risultati for item in sublist]
-
-    mutazioni_finali = applica_matrice_cognitiva(tutte_mutazioni, profilo)
-
-    return mutazioni_finali
+    return applica_matrice_cognitiva(tutte_mutazioni, profilo)

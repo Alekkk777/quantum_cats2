@@ -104,7 +104,7 @@ export function ClaimMeasurementBlock(p: ClaimMeasurementBlockProps) {
                 <div className="mt-2 ml-[28px] rounded-md border border-rule bg-paper-2 px-3 py-2.5">
                   <textarea
                     className="w-full min-h-[64px] px-2.5 py-2 rounded border border-rule bg-paper font-serif text-[13.5px] text-ink resize-y placeholder:italic placeholder:text-ink-4 focus:outline-none focus:border-indigo-2"
-                    placeholder="What do you disagree with? Schrödinger will respond."
+                    placeholder="What do you disagree with? Shrodinger will respond."
                     value={challengeText}
                     onChange={(e) => setChallengeText(e.target.value)}
                   />
@@ -114,7 +114,7 @@ export function ClaimMeasurementBlock(p: ClaimMeasurementBlockProps) {
                       onClick={startChallenge}
                       disabled={!challengeText.trim() || debateLoading === claim.id}
                     >
-                      Challenge Schrödinger
+                      Challenge Shrodinger
                     </button>
                     <button className="btn btn-subtle" onClick={() => setSelectedClaim(null)}>
                       Cancel
@@ -123,7 +123,7 @@ export function ClaimMeasurementBlock(p: ClaimMeasurementBlockProps) {
                 </div>
               )}
 
-              {/* Debate thread — shown once a challenge has started */}
+              {/* Debate thread shown once a challenge has started */}
               {(debates[claim.id]?.length ?? 0) > 0 || debateLoading === claim.id ? (
                 <DebateThread
                   claimLabel={claim.label}
@@ -162,7 +162,7 @@ export function ClaimMeasurementBlock(p: ClaimMeasurementBlockProps) {
       </div>
       <div className="block-foot">
         <span className="font-mono text-[11px] text-ink-3">
-          Mistake repaired, not erased — the original claim stays in your trace as an anchor for recall.
+          Mistake repaired, not erased - the original claim stays in your trace as an anchor for recall.
         </span>
       </div>
     </div>

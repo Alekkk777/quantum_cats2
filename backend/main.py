@@ -32,7 +32,7 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 load_dotenv()
 
-app = FastAPI(title="Braynr / Shrodinger Study Companion API")
+app = FastAPI(title="Shrodinger Study Companion API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -114,6 +114,11 @@ async def get_planning_questions():
 @app.post("/api/init-persona")
 async def init_user_persona(data: PlanningSubmit):
     """React chiama questo quando l'utente finisce il form iniziale."""
+    speed_text = data.velocita.lower()
+    background_text = data.self_assessment.lower()
+    is_fast = any(word in speed_text for word in ("hurry", "short", "fretta"))
+    is_expert = any(word in background_text for word in ("expert", "confident", "challenge", "esperto"))
+
     nuovo_profilo = {
         "utente_id": "studente_hackathon",
         "grafo_conoscenza": {
@@ -122,9 +127,9 @@ async def init_user_persona(data: PlanningSubmit):
             "lacune": [],
         },
         "persona_comportamentale": {
-            "velocita": "alta" if "fretta" in data.velocita.lower() else "media",
-            "frizione_preferita": "alta" if "esperto" in data.self_assessment.lower() else "bilanciata",
-            "dipendenza_aiuti": "bassa" if "esperto" in data.self_assessment.lower() else "alta",
+            "velocita": "alta" if is_fast else "media",
+            "frizione_preferita": "alta" if is_expert else "bilanciata",
+            "dipendenza_aiuti": "bassa" if is_expert else "alta",
             "obiettivo": data.obiettivo,
             "errori_consecutivi": 0,
         },
@@ -274,7 +279,7 @@ class GenerateConceptLinksRequest(BaseModel):
 
 @app.post("/challenge-claim")
 async def challenge_claim_endpoint(req: ChallengeClaimRequest):
-    """Schrödinger responds to the student's challenge on a specific claim."""
+    """Shrodinger responds to the student's challenge on a specific claim."""
     return challenge_claim_live(
         claim_text=req.claim_text,
         claim_verdict=req.claim_verdict,

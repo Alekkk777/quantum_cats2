@@ -19,16 +19,16 @@ const docs: Array<[string, string, string]> = [
 ];
 
 const goals: Array<[StudySession['goal'], string]> = [
-  ['exam',  'Pass the exam'],
+  ['exam', 'Pass the exam'],
   ['build', 'Build something with this'],
   ['teach', 'Teach it to a peer'],
   ['curio', 'Just curious'],
 ];
 
 const depths: Array<[StudySession['depth'], string]> = [
-  ['light', 'Light — 1 checkpoint / page'],
-  ['rigorous', 'Rigorous — checkpoints at every fragile concept'],
-  ['oral', 'Oral defense — explain everything'],
+  ['light', 'Light - 1 checkpoint / page'],
+  ['rigorous', 'Rigorous - checkpoints at every fragile concept'],
+  ['oral', 'Oral defense - explain everything'],
 ];
 
 export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
@@ -56,17 +56,21 @@ export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
           </div>
         </div>
 
-        {/* Mode toggle */}
         <div className="flex gap-px mb-4 p-1 rounded-lg bg-paper-2 border border-rule w-fit">
           <ModeBtn active={mode === 'demo'} onClick={() => setMode('demo')}>Demo</ModeBtn>
-          <ModeBtn active={mode === 'live'} onClick={() => setMode('live')}>Live — upload your doc</ModeBtn>
+          <ModeBtn active={mode === 'live'} onClick={() => setMode('live')}>Live - upload your doc</ModeBtn>
         </div>
 
         {mode === 'demo' ? (
           <Field label="Document">
             <div className="flex gap-1.5 flex-wrap">
               {docs.map(([id, name, sub]) => (
-                <SegBtn key={id} on={doc === id} onClick={() => setDoc(id)} className="flex-1 min-w-0 flex flex-col gap-0.5 items-start">
+                <SegBtn
+                  key={id}
+                  on={doc === id}
+                  onClick={() => setDoc(id)}
+                  className="flex-1 min-w-0 flex flex-col gap-0.5 items-start"
+                >
                   <span className="font-serif text-[14px] font-semibold">{name}</span>
                   <span className="font-mono text-[10px] text-ink-4 tracking-[0.04em]">{sub}</span>
                 </SegBtn>
@@ -76,8 +80,8 @@ export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
         ) : (
           <div className="mb-3 px-4 py-3.5 rounded-md border border-rule bg-paper-2">
             <p className="font-serif text-[14.5px] text-ink-2 leading-relaxed">
-              After clicking <strong className="text-ink">Begin</strong>, you'll upload any PDF, Markdown, or text file.
-              Shrodinger will extract your document, generate study checkpoints, and insert subtle anchors — all live.
+              After clicking <strong className="text-ink">Begin</strong>, upload any PDF, Markdown, or text file.
+              Shrodinger will extract your document, generate study checkpoints, and insert subtle anchors - all live.
             </p>
             <p className="mt-1.5 font-mono text-[10px] text-ink-4 tracking-[0.04em]">
               Backend must be running at localhost:8000
@@ -149,6 +153,8 @@ function SegBtn({
       className={`px-3 py-1.5 rounded-md border text-[13px] text-left transition-colors ${
         on ? 'border-indigo bg-indigo-soft text-indigo font-semibold' : 'border-rule bg-paper text-ink-2 hover:border-ink-4 hover:text-ink'
       } ${className}`}
-    />
+    >
+      {children}
+    </button>
   );
 }

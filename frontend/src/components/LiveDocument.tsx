@@ -1,8 +1,10 @@
 import type { Mutazione } from '../lib/api';
-import type { Claim, ClaimReview } from '../types';
+import type { Claim, ClaimReview, ConceptLink, TextAnchor } from '../types';
 import { ClozeWord } from './mutations/ClozeWord';
 import { InsightBlock } from './mutations/InsightBlock';
 import { ChallengeBlock } from './mutations/ChallengeBlock';
+import { ConceptLinkNote } from './blocks/ConceptLinkNote';
+import { TextAnchorNote } from './blocks/TextAnchorNote';
 
 interface LiveDocumentProps {
   sectionId: string;
@@ -12,6 +14,8 @@ interface LiveDocumentProps {
   onClaimReview: (review: ClaimReview, usedFallback: boolean) => void;
   onClaimRepair: (review: ClaimReview, revisedAnswer: string) => void;
   onChallengeRecorded: (claim: Claim, note: string) => void;
+  textAnchors?: TextAnchor[];
+  conceptLinks?: ConceptLink[];
 }
 
 export function LiveDocument({
@@ -22,6 +26,8 @@ export function LiveDocument({
   onClaimReview,
   onClaimRepair,
   onChallengeRecorded,
+  textAnchors = [],
+  conceptLinks = [],
 }: LiveDocumentProps) {
   const paragraphs = testo.split(/\n\n+/).filter(p => p.trim());
 
@@ -37,6 +43,8 @@ export function LiveDocument({
           onClaimReview={onClaimReview}
           onClaimRepair={onClaimRepair}
           onChallengeRecorded={onChallengeRecorded}
+          textAnchors={i === 0 ? textAnchors : []}
+          conceptLinks={i === 0 ? conceptLinks : []}
         />
       ))}
     </article>
@@ -50,6 +58,8 @@ function AnnotatedParagraph({
   onClaimReview,
   onClaimRepair,
   onChallengeRecorded,
+  textAnchors,
+  conceptLinks,
 }: {
   text: string;
   mutazioni: Mutazione[];
@@ -57,13 +67,27 @@ function AnnotatedParagraph({
   onClaimReview: (review: ClaimReview, usedFallback: boolean) => void;
   onClaimRepair: (review: ClaimReview, revisedAnswer: string) => void;
   onChallengeRecorded: (claim: Claim, note: string) => void;
+  textAnchors: TextAnchor[];
+  conceptLinks: ConceptLink[];
 }) {
   // Heading detection
   if (text.startsWith('## ') || text.startsWith('### ')) {
-    return <h2>{text.replace(/^#{2,3} /, '')}</h2>;
+    return (
+      <>
+        <h2>{text.replace(/^#{2,3} /, '')}</h2>
+        {textAnchors.map((anchor) => <TextAnchorNote key={anchor.id} anchor={anchor} />)}
+        {conceptLinks.map((link) => <ConceptLinkNote key={link.id} link={link} />)}
+      </>
+    );
   }
   if (text.startsWith('# ')) {
-    return <h1>{text.replace(/^# /, '')}</h1>;
+    return (
+      <>
+        <h1>{text.replace(/^# /, '')}</h1>
+        {textAnchors.map((anchor) => <TextAnchorNote key={anchor.id} anchor={anchor} />)}
+        {conceptLinks.map((link) => <ConceptLinkNote key={link.id} link={link} />)}
+      </>
+    );
   }
 
   // Check for domanda_inline that matches this paragraph
@@ -82,6 +106,8 @@ function AnnotatedParagraph({
       <p>
         <AnnotatedText text={text} mutations={inlineMuts} onInteraction={onInteraction} />
       </p>
+      {textAnchors.map((anchor) => <TextAnchorNote key={anchor.id} anchor={anchor} />)}
+      {conceptLinks.map((link) => <ConceptLinkNote key={link.id} link={link} />)}
       {challengeMut && (
         <ChallengeBlock
           mutazione={challengeMut}

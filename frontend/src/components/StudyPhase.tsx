@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getStudyMode, recordInteraction } from '../lib/api';
+import { generateConceptLinks, generateTextAnchors, getStudyMode, recordInteraction } from '../lib/api';
 import type { StudyModeResponse, UserBrainState } from '../lib/api';
-import type { Claim, ClaimReview, LearningTraceState, MistakeFossil, RecallItem, TraceEvent } from '../types';
+import type { Claim, ClaimReview, ConceptLink, LearningTraceState, MistakeFossil, RecallItem, TextAnchor, TraceEvent } from '../types';
 import { initialTrace } from '../data/initialTrace';
 import { LiveDocument } from './LiveDocument';
 import { LearningTraceSidebar } from './trace/LearningTraceSidebar';
@@ -79,13 +79,19 @@ function recallFromReview(review: ClaimReview, sectionId: string): RecallItem | 
 export function StudyPhase({ sezioni }: StudyPhaseProps) {
   const [currentSection, setCurrentSection] = useState(sezioni[0] ?? '');
   const [studyData, setStudyData] = useState<StudyModeResponse | null>(null);
+  const [textAnchors, setTextAnchors] = useState<TextAnchor[]>([]);
+  const [conceptLinks, setConceptLinks] = useState<ConceptLink[]>([]);
   const [trace, setTrace] = useState<LearningTraceState>(initialTrace);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const currentIndex = Math.max(0, sezioni.indexOf(currentSection));
 
   const loadSection = async (sectionId: string) => {
+    if (!sectionId) return;
     setLoading(true);
     setError(null);
+    setTextAnchors([]);
+    setConceptLinks([]);
     try {
       const data = await getStudyMode(sectionId);
       setStudyData(data);
@@ -102,6 +108,30 @@ export function StudyPhase({ sezioni }: StudyPhaseProps) {
           now: true,
         })),
       }));
+
+      const topics = data.mutazioni_attive.map((m) => m.target).filter(Boolean).slice(0, 4);
+      Promise.all([
+        generateTextAnchors({
+          documentId: sectionId,
+          selectedTopics: topics,
+          documentExcerpt: data.testo_originale,
+          demoMode: false,
+        }),
+        generateConceptLinks({
+          documentId: sectionId,
+          selectedTopics: topics,
+          documentExcerpt: data.testo_originale,
+          learnerTraceSummary: conceptFromStudyData(sectionId, data).rationale,
+          demoMode: false,
+        }),
+      ])
+        .then(([anchors, links]) => {
+          setTextAnchors(anchors.anchors);
+          setConceptLinks(links.links);
+        })
+        .catch((err) => {
+          console.warn('[Shrodinger] live augmentation failed; continuing with checkpoint UI only.', err);
+        });
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -112,6 +142,28 @@ export function StudyPhase({ sezioni }: StudyPhaseProps) {
   useEffect(() => {
     if (currentSection) loadSection(currentSection);
   }, []);
+
+  const goToSection = (index: number) => {
+    if (loading) return;
+    const nextSection = sezioni[index];
+    if (!nextSection || nextSection === currentSection) return;
+    loadSection(nextSection);
+  };
+
+  const goBack = () => goToSection(currentIndex - 1);
+  const goNext = () => goToSection(currentIndex + 1);
+  const resetSections = () => goToSection(0);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') return;
+      if (e.key === 'ArrowLeft') goBack();
+      if (e.key === 'ArrowRight') goNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   const handleInteraction = async (concetto: string, esito: 'superato' | 'fallito') => {
     try {
@@ -224,28 +276,6 @@ export function StudyPhase({ sezioni }: StudyPhaseProps) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_var(--side-w)] h-[calc(100vh-var(--topbar-h))]">
       <div className="overflow-y-auto">
-        {sezioni.length > 1 && (
-          <div className="sticky top-0 z-20 border-b border-rule bg-paper/85 backdrop-blur-md">
-            <div className="max-w-[var(--doc-col)] mx-auto px-8 py-2 flex items-center gap-2 overflow-x-auto">
-              <span className="label-mono shrink-0">Sections</span>
-              {sezioni.map((id) => (
-                <button
-                  key={id}
-                  className={`px-2 py-1 rounded border font-mono text-[10.5px] transition-colors ${
-                    id === currentSection
-                      ? 'border-indigo-edge bg-indigo-soft text-indigo'
-                      : 'border-transparent text-ink-3 hover:border-rule hover:bg-paper-3 hover:text-ink'
-                  }`}
-                  onClick={() => loadSection(id)}
-                  disabled={loading}
-                >
-                  {readableSection(id)}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {loading && (
           <div className="flex items-center justify-center h-64">
             <div className="flex flex-col items-center gap-3">
@@ -270,6 +300,8 @@ export function StudyPhase({ sezioni }: StudyPhaseProps) {
             onClaimReview={handleClaimReview}
             onClaimRepair={handleClaimRepair}
             onChallengeRecorded={handleChallengeRecorded}
+            textAnchors={textAnchors}
+            conceptLinks={conceptLinks}
           />
         )}
 
@@ -281,7 +313,97 @@ export function StudyPhase({ sezioni }: StudyPhaseProps) {
           </div>
         )}
       </div>
+      <SectionControls
+        currentIndex={currentIndex}
+        currentSection={currentSection}
+        loading={loading}
+        sections={sezioni}
+        onBack={goBack}
+        onJump={goToSection}
+        onNext={goNext}
+        onReset={resetSections}
+      />
       <LearningTraceSidebar trace={trace} />
+    </div>
+  );
+}
+
+function SectionControls({
+  currentIndex,
+  currentSection,
+  loading,
+  sections,
+  onBack,
+  onJump,
+  onNext,
+  onReset,
+}: {
+  currentIndex: number;
+  currentSection: string;
+  loading: boolean;
+  sections: string[];
+  onBack: () => void;
+  onJump: (index: number) => void;
+  onNext: () => void;
+  onReset: () => void;
+}) {
+  if (sections.length <= 1) return null;
+
+  const total = sections.length;
+  const idx = Math.min(Math.max(currentIndex, 0), total - 1);
+
+  return (
+    <div className="fixed bottom-4 left-1/2 z-30 flex max-w-[760px] -translate-x-1/2 items-center gap-2.5 rounded-full bg-ink/90 px-3.5 py-1.5 text-paper shadow-[0_12px_30px_oklch(0.20_0.01_270/0.25)]">
+      <span className="font-mono text-[10.5px] tracking-[0.1em] text-paper-3">
+        {String(idx + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+      </span>
+      <span className="max-w-[220px] truncate font-serif text-[14px] font-medium">
+        {loading ? 'Loading...' : `Reading ${readableSection(currentSection)}`}
+      </span>
+      <div className="flex max-w-[220px] gap-1 overflow-hidden">
+        {sections.map((section, i) => (
+          <button
+            key={section}
+            className="h-1 w-4 shrink-0 rounded-full transition-colors"
+            style={{
+              background: i === idx
+                ? 'oklch(0.78 0.05 280)'
+                : i < idx
+                  ? 'oklch(0.55 0.14 280)'
+                  : 'oklch(0.40 0.01 270)',
+            }}
+            onClick={() => onJump(i)}
+            disabled={loading || i === idx}
+            aria-label={`Go to ${readableSection(section)}`}
+            title={readableSection(section)}
+            type="button"
+          />
+        ))}
+      </div>
+      <button
+        onClick={onBack}
+        disabled={loading || idx <= 0}
+        className="rounded-full border border-ink-3 bg-ink-2 px-2.5 py-1 text-[12px] text-paper disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Previous section"
+      >
+        Back
+      </button>
+      <button
+        onClick={onNext}
+        disabled={loading || idx >= total - 1}
+        className="rounded-full border border-indigo bg-indigo px-2.5 py-1 text-[12px] text-paper disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Next section"
+      >
+        Next
+      </button>
+      <button
+        onClick={onReset}
+        disabled={loading || idx === 0}
+        className="rounded-full border border-ink-3 bg-ink-2 px-2.5 py-1 text-[12px] text-paper disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Return to first section"
+      >
+        Reset
+      </button>
     </div>
   );
 }

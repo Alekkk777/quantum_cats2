@@ -14,13 +14,12 @@ import { textAnchorsDemo } from './data/textAnchorsDemo';
 import { conceptLinksDemo } from './data/conceptLinksDemo';
 
 const STUDENT_RIGHT_ANSWER =
-  "If locality holds, realism must be abandoned. Bell's theorem proves that locality and realism together require Bell's inequality to hold, but experiments violate it. Quantum particles cannot carry pre-existing definite properties — EPR's local hidden variable program is experimentally closed off.";
+  "If locality holds, realism must be abandoned. Bell's theorem proves that locality and realism together require Bell's inequality to hold, but experiments violate it. Quantum particles cannot carry pre-existing definite properties, so EPR's local hidden variable program is experimentally closed off.";
 
 export default function App() {
   const [session, dispatch] = useReducer(sessionReducer, demoSession);
   const [setupOpen, setSetupOpen] = useState(true);
 
-  // Live mode state
   const [appMode, setAppMode] = useState<'demo' | 'live'>('demo');
   const [liveSections, setLiveSections] = useState<string[]>([]);
   const [liveDocTitle, setLiveDocTitle] = useState('');
@@ -54,7 +53,7 @@ export default function App() {
       setTimeout(() => dispatch({ type: 'set-answer', checkpointId: 'bell-inequality', answer: STUDENT_WRONG_ANSWER }), 200);
       return;
     }
-    if (phase === 'open')      return onSubmitAnswer('bell-inequality');
+    if (phase === 'open') return onSubmitAnswer('bell-inequality');
     if (phase === 'measuring') return dispatch({ type: 'begin-revision', checkpointId: 'bell-inequality' });
     if (phase === 'revising') {
       dispatch({ type: 'apply-revision', checkpointId: 'bell-inequality', revisedAnswer: STUDENT_RIGHT_ANSWER });
@@ -63,8 +62,8 @@ export default function App() {
   };
 
   const back = () => {
-    if (phase === 'reading')   return setSetupOpen(true);
-    if (phase === 'open')      return dispatch({ type: 'open-checkpoint', checkpointId: 'bell-inequality' });
+    if (phase === 'reading') return setSetupOpen(true);
+    if (phase === 'open') return dispatch({ type: 'open-checkpoint', checkpointId: 'bell-inequality' });
   };
 
   const reset = () => window.location.reload();
@@ -74,7 +73,7 @@ export default function App() {
       const t = e.target as HTMLElement;
       if (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') return;
       if (e.key === 'ArrowRight') next();
-      if (e.key === 'ArrowLeft')  back();
+      if (e.key === 'ArrowLeft') back();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -84,20 +83,16 @@ export default function App() {
     setAppMode(cfg.mode);
     if (cfg.mode === 'demo') {
       dispatch({ type: 'start-session', goal: cfg.goal, depth: cfg.depth, doc: cfg.doc });
-      setSetupOpen(false);
-    } else {
-      // Live mode: SetupOverlay closes and UploadPhase takes over
-      setSetupOpen(false);
     }
+    setSetupOpen(false);
   };
 
-  // ── Live mode ──────────────────────────────────────────────────────────
   if (appMode === 'live') {
     const title = liveDocTitle || 'Your document';
     return (
       <>
         <TopBar
-          documentTitle={liveReady ? title : 'Shrodinger — Live mode'}
+          documentTitle={liveReady ? title : 'Shrodinger - Live mode'}
           chapterCrumb={liveReady ? 'Quantum Cats / Live study' : 'Upload your document'}
           status={liveReady ? 'studying' : 'idle'}
           onExportTrace={() => alert('Trace exported as JSON.')}
@@ -118,7 +113,6 @@ export default function App() {
     );
   }
 
-  // ── Demo mode ──────────────────────────────────────────────────────────
   return (
     <>
       <TopBar
@@ -143,10 +137,7 @@ export default function App() {
         <LearningTraceSidebar trace={session.trace} />
       </div>
 
-      <SetupOverlay
-        open={setupOpen}
-        onStart={handleStart}
-      />
+      <SetupOverlay open={setupOpen} onStart={handleStart} />
 
       <DemoControls
         phase={phase}

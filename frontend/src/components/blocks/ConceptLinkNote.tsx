@@ -20,12 +20,12 @@ export function ConceptLinkNote({ link }: ConceptLinkNoteProps) {
 
   return (
     <div className="my-1.5 flex items-start gap-2">
-      <span className="font-mono text-[10px] text-ink-4 mt-0.5 shrink-0">↔</span>
+      <span className="font-mono text-[10px] text-ink-4 mt-0.5 shrink-0">&lt;-&gt;</span>
       <div>
         <button className="flex items-center gap-1.5 text-left flex-wrap" onClick={() => setOpen((o) => !o)}>
           <span className="font-mono text-[11px] text-ink-2 tracking-[0.02em]">
             {link.from_concept}{' '}
-            <span className="text-indigo font-semibold">↔</span>{' '}
+            <span className="text-indigo font-semibold">&lt;-&gt;</span>{' '}
             {link.to_concept}
           </span>
           <span className="font-mono text-[9px] text-ink-4 border border-rule rounded-full px-1.5 py-px tracking-[0.05em] uppercase">

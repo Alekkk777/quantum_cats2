@@ -89,6 +89,58 @@ export interface PlanningResponse {
   domande: PlanningQuestion[];
 }
 
+const fallbackPlanning: PlanningResponse = {
+  fase: 'Planning',
+  titolo_ui: 'Set up your study session',
+  domande: [
+    {
+      id: 'q1_goal',
+      testo: 'What is your goal with this document?',
+      opzioni: ['Review for an exam', 'First exploratory read', 'Look up specific concepts'],
+    },
+    {
+      id: 'q2_time',
+      testo: 'How much time do you have today?',
+      opzioni: ['Short - I am in a hurry', 'Enough - 30 to 60 minutes', 'Plenty - I want to go deep'],
+    },
+    {
+      id: 'q3_background',
+      testo: 'How much background do you already have?',
+      opzioni: ['Starting from scratch', 'I have some background', 'I am confident - challenge me'],
+    },
+  ],
+};
+
+function normalizePlanningResponse(raw: unknown): PlanningResponse {
+  const data = (raw ?? {}) as Record<string, unknown>;
+  const rawQuestions = Array.isArray(data.domande)
+    ? data.domande
+    : Array.isArray(data.questions)
+      ? data.questions
+      : [];
+
+  const domande = rawQuestions.map((item, index) => {
+    const q = (item ?? {}) as Record<string, unknown>;
+    const options = Array.isArray(q.opzioni)
+      ? q.opzioni
+      : Array.isArray(q.options)
+        ? q.options
+        : [];
+
+    return {
+      id: String(q.id ?? `q${index + 1}`),
+      testo: String(q.testo ?? q.text ?? q.label ?? fallbackPlanning.domande[index]?.testo ?? 'Choose one option'),
+      opzioni: options.map(String).filter(Boolean),
+    };
+  }).filter((q) => q.opzioni.length > 0);
+
+  return {
+    fase: String(data.fase ?? data.phase ?? fallbackPlanning.fase),
+    titolo_ui: String(data.titolo_ui ?? data.title ?? fallbackPlanning.titolo_ui),
+    domande: domande.length > 0 ? domande : fallbackPlanning.domande,
+  };
+}
+
 export interface Mutazione {
   fase_pacrar: string;
   tipo_ui: 'cloze' | 'insight' | 'domanda_inline' | 'confronto';
@@ -121,7 +173,12 @@ export async function uploadDocument(file: File): Promise<{ status: string; mess
 }
 
 export async function getPlanningQuestions(): Promise<PlanningResponse> {
-  return request('/api/planning');
+  try {
+    return normalizePlanningResponse(await request<unknown>('/api/planning'));
+  } catch (err) {
+    console.warn('[Shrodinger] /api/planning failed; using local planning fallback.', err);
+    return fallbackPlanning;
+  }
 }
 
 export async function initPersona(data: {

@@ -3,10 +3,10 @@ import type { TextAnchor } from '../../types';
 
 const kindGlyph: Record<TextAnchor['kind'], string> = {
   definition: 'Def',
-  formula: '∑',
-  warning: '⚠',
+  formula: 'Sum',
+  warning: 'Warn',
   context: 'Ctx',
-  assumption: '△',
+  assumption: 'Asm',
   example: 'Ex',
 };
 
@@ -28,11 +28,11 @@ export function TextAnchorNote({ anchor }: TextAnchorNoteProps) {
         onClick={() => setOpen((o) => !o)}
       >
         <span className="font-mono text-[9.5px] tracking-[0.08em] uppercase text-indigo bg-indigo-soft px-1.5 py-px rounded shrink-0">
-          {kindGlyph[anchor.kind]} · {anchor.label}
+          {kindGlyph[anchor.kind]} / {anchor.label}
         </span>
         {!open && (
           <span className="font-serif text-[12.5px] text-ink-3 italic truncate">
-            {anchor.body.slice(0, 72)}…
+            {anchor.body.slice(0, 72)}...
           </span>
         )}
       </button>

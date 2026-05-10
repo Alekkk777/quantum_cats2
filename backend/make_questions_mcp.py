@@ -117,8 +117,71 @@ def _message_content_to_text(content: Any) -> str:
 def _fallback_review(question: str, answer: str, context: str) -> ClaimReview:
     """
     Deterministic fallback for demo safety.
-    Specific to the Reader/MCP example, which is fine for the hackathon demo path.
+    Uses the quantum demo fixture when the context is about Bell/entanglement,
+    otherwise falls back to the older Reader/MCP checkpoint.
     """
+    combined = f"{question}\n{context}".lower()
+    if any(token in combined for token in ("bell", "entanglement", "locality", "realism", "hidden variable")):
+        return ClaimReview(
+            review_title="3 claims extracted",
+            summary="Shrodinger found one correct direction and two important misconceptions about Bell's theorem.",
+            original_answer=answer,
+            claims=[
+                Claim(
+                    id="c1",
+                    text="Locality can be preserved in the standard reading.",
+                    verdict="correct",
+                    label="CORRECT",
+                    rationale="The context says most physicists preserve locality and abandon realism instead.",
+                    improvement=None,
+                    source_span=SourceSpan(
+                        section_id="context",
+                        quote="Most physicists accept that realism must be abandoned."
+                    ),
+                    severity="minor",
+                ),
+                Claim(
+                    id="c2",
+                    text="Hidden variables can explain quantum correlations while locality holds.",
+                    verdict="incorrect",
+                    label="INCORRECT - LOCAL REALISM",
+                    rationale="Bell's theorem and experiments rule out local hidden-variable theories.",
+                    improvement="No local hidden-variable theory can reproduce the observed quantum correlations.",
+                    source_span=SourceSpan(
+                        section_id="context",
+                        quote="Experiments violate this bound."
+                    ),
+                    severity="major",
+                ),
+                Claim(
+                    id="c3",
+                    text="Realism can remain safe if locality is confirmed.",
+                    verdict="incorrect",
+                    label="INCORRECT - WRONG ASSUMPTION",
+                    rationale="If locality is kept, realism is the assumption that must be abandoned to account for the experimental violation.",
+                    improvement="If locality holds, realism must be abandoned.",
+                    source_span=SourceSpan(
+                        section_id="context",
+                        quote="at least one assumption must be false"
+                    ),
+                    severity="major",
+                ),
+            ],
+            missing_ideas=[
+                "Bell's inequality follows from locality plus realism.",
+                "Experiments violate Bell's bound.",
+                "Keeping locality means abandoning realism, not saving hidden variables.",
+            ],
+            suggested_revision=(
+                "If locality holds, realism must be abandoned. Bell's theorem shows that locality "
+                "and realism together require Bell's inequality, but experiments violate it. "
+                "So quantum particles cannot carry pre-existing definite properties."
+            ),
+            next_retrieval_prompt=(
+                "If Bell experiments violate the bound while locality is kept, which assumption must be abandoned?"
+            ),
+        )
+
     return ClaimReview(
         review_title="3 claims extracted",
         summary="Shrodinger found one role inversion and one vague mechanism.",
@@ -198,6 +261,7 @@ Generate exactly ONE checkpoint question.
 
 Rules:
 - Return only the question.
+- The question must be written in English, even if the source context is Italian or multilingual.
 - Keep it under 25 words.
 - Ask one thing only.
 - Do not use "and" to combine two questions.
@@ -272,6 +336,10 @@ You must:
 14. If the answer omits a key distinction from the context, include it in missing_ideas.
 15. Mark severity as "major" only when the claim reflects a real misconception.
 16. If a claim is supported by the source, include a short source_span quote.
+17. Write every user-facing field in English: review_title, summary, claim text,
+    label, rationale, improvement, missing_ideas, suggested_revision, and
+    next_retrieval_prompt. If the source or answer is Italian, translate the
+    conceptual content into natural English before rendering it.
 
 Example of claim splitting:
 Student answer:
@@ -329,7 +397,7 @@ def challenge_claim_live(
     history: list,
     demo_mode: bool = False,
 ) -> dict:
-    """Schrödinger responds to a student's claim challenge."""
+    """Shrodinger responds to a student's claim challenge."""
     if demo_mode:
         return {
             "response": (
@@ -343,11 +411,11 @@ def challenge_claim_live(
         }
 
     history_text = "\n".join(
-        f"{'Student' if h.get('role') == 'student' else 'Schrödinger'}: {h.get('text', '')}"
+        f"{'Student' if h.get('role') == 'student' else 'Shrodinger'}: {h.get('text', '')}"
         for h in history
     )
 
-    prompt = f"""You are Schrödinger, an academic study companion embedded in a physics learning app.
+    prompt = f"""You are Shrodinger, an English-language academic study companion embedded in a physics learning app.
 
 A student has challenged your claim assessment.
 
@@ -364,6 +432,7 @@ Respond in 2-3 sentences:
 - If the student is mistaken, explain precisely why without being condescending
 - End with a short probing follow-up question
 - Be Socratic: guide through questions rather than assertions
+- Write the response in English, even if the source or student challenge is Italian.
 
 Return ONLY valid JSON: {{"response": "...", "stance": "affirm|concede|partial_concede"}}""".strip()
 
@@ -407,24 +476,25 @@ def generate_text_anchors_live(
             return {"anchors": json.load(f)}
 
     topics_str = ", ".join(selected_topics) if selected_topics else "all topics"
-    prompt = f"""You are Schrödinger, an academic study companion.
+    prompt = f"""You are Shrodinger, an English-language academic study companion.
 
 Generate exactly 3 text anchors for the source excerpt below.
 Focus on: {topics_str}
 
 Rules:
 - Each anchor must be tied to a specific quote from the source.
-- anchor_id must match one of: "2.0", "2.1", "2.2", "2.3", "2.4"
+- anchor_id should be "{_document_id}" when this excerpt is a single uploaded section.
 - kind must be one of: definition, formula, warning, context, assumption, example
 - priority must be one of: low, medium, high
 - body must be 1-2 short sentences. No summaries. No generic advice.
 - source_quote must be a short verbatim or near-verbatim excerpt.
+- Write label and body in English, even if the source excerpt is Italian or multilingual.
 
 Source:
 {document_excerpt[:2000]}
 
 Return ONLY valid JSON: {{"anchors": [{{
-  "id": "ta-1", "anchor_id": "2.X", "topic": "...", "kind": "...",
+  "id": "ta-1", "anchor_id": "{_document_id}", "topic": "...", "kind": "...",
   "label": "...", "body": "...", "source_quote": "...",
   "priority": "high|medium|low", "collapsed_by_default": false
 }}, ...]}}""".strip()
@@ -457,17 +527,18 @@ def generate_concept_links_live(
             return {"links": json.load(f)}
 
     topics_str = ", ".join(selected_topics) if selected_topics else "all topics"
-    prompt = f"""You are Schrödinger, an academic study companion.
+    prompt = f"""You are Shrodinger, an English-language academic study companion.
 
 Generate exactly 3 concept links for the source excerpt below.
 Focus on: {topics_str}
 
 Rules:
 - Each link connects two concepts from the source.
-- anchor_id must match one of: "2.0", "2.1", "2.2", "2.3", "2.4"
+- anchor_id should be "{_document_id}" when this excerpt is a single uploaded section.
 - relation must be one of: prerequisite, contrast, causes, supports, example_of, often_confused_with, applies_to
 - explanation must be 1-2 short sentences. Ground in the source only.
-- label format: "A ↔ B"
+- label format: "A <-> B"
+- Write label and explanation in English, even if the source excerpt is Italian or multilingual.
 
 Source:
 {document_excerpt[:2000]}
@@ -476,8 +547,8 @@ Source:
 
 Return ONLY valid JSON: {{"links": [{{
   "id": "cl-1", "from_concept": "...", "to_concept": "...",
-  "relation": "...", "anchor_id": "2.X",
-  "label": "... ↔ ...", "explanation": "...", "source_quote": "...",
+  "relation": "...", "anchor_id": "{_document_id}",
+  "label": "... <-> ...", "explanation": "...", "source_quote": "...",
   "priority": "high|medium|low", "collapsed_by_default": false
 }}, ...]}}""".strip()
 
