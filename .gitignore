@@ -19,5 +19,10 @@ frontend/.env.*
 react-app/
 .npm-cache/
 
+# Backend runtime data (generated at runtime, not source)
+backend/data/source_chunks.json
+backend/data/user_brain.json
+
 # OS/editor
 .DS_Store
+command.txt

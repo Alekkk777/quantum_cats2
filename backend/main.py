@@ -1,12 +1,15 @@
 import os
 import shutil
 import json
+import pathlib
 import uvicorn
 from io import BytesIO
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from ingest import elabora_documento
@@ -328,5 +331,20 @@ async def generate_concept_links_endpoint(req: GenerateConceptLinksRequest):
     )
 
 
+
+# ── Static frontend (built Vite dist) ────────────────────────────────────
+
+FRONTEND_DIST = pathlib.Path(__file__).parent.parent / "frontend" / "dist"
+
+if FRONTEND_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(full_path: str):
+        index = FRONTEND_DIST / "index.html"
+        return FileResponse(str(index))
+
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

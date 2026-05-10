@@ -1,0 +1,10 @@
+run = "bash start-replit.sh"
+entrypoint = "start-replit.sh"
+modules = ["python-3.11:v25-20240716-827145b", "nodejs-20:v25-20231220-c89d81d"]
+
+[nix]
+channel = "stable-24_05"
+
+[[ports]]
+localPort = 8000
+externalPort = 80
