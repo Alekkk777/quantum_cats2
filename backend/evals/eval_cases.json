@@ -1,0 +1,109 @@
+[
+  {
+    "id": "reader_mcp_claim_review",
+    "type": "check_claim",
+    "endpoint": "/check-claim",
+    "phase": "checkpoint",
+    "expected_tool": "check_claim",
+    "question": "Why is the Reader tier restricted from accessing MCP tools when handling untrusted documents?",
+    "answer": "The Reader must not have MCP access because it writes the final output, so it could leak data.",
+    "context": "The Reader tier touches untrusted documents. It has Read and Grep only. It has no MCP access, no write tools, and no bash. The Orchestrator never touches untrusted documents directly and has MCP access to trusted internal systems. The Resolver is the only tier with write access.",
+    "expected_properties": [
+      "returns valid ClaimReview JSON",
+      "extracts at least 2 claims",
+      "marks the claim \"The Reader writes the final output\" as incorrect or partial",
+      "mentions Resolver has write access",
+      "includes suggested_revision",
+      "includes next_retrieval_prompt"
+    ]
+  },
+  {
+    "id": "quantum_measurement_claim_review",
+    "type": "check_claim",
+    "endpoint": "/check-claim",
+    "phase": "checkpoint",
+    "expected_tool": "check_claim",
+    "question": "Explain what happens when a qubit in superposition is measured.",
+    "answer": "The qubit is both 0 and 1 at the same time, and measurement reveals which value it already had.",
+    "context": "A qubit state may be written as \u03b1|0\u27e9 + \u03b2|1\u27e9. Measurement returns a classical outcome, 0 or 1, with probabilities |\u03b1|\u00b2 and |\u03b2|\u00b2. In the standard interpretation, measurement does not simply reveal a pre-existing classical bit.",
+    "expected_properties": [
+      "flags \"measurement reveals which value it already had\" as incorrect, partial, or unsupported",
+      "distinguishes superposition from a hidden classical value",
+      "mentions probabilities from amplitudes",
+      "returns valid ClaimReview JSON"
+    ]
+  },
+  {
+    "id": "correct_answer_claim_review",
+    "type": "check_claim",
+    "endpoint": "/check-claim",
+    "phase": "checkpoint",
+    "expected_tool": "check_claim",
+    "question": "Explain why the Reader tier has no MCP access.",
+    "answer": "The Reader handles untrusted documents, so it is restricted to read-only operations. The Orchestrator can access trusted internal MCP systems, and the Resolver is the tier with write access.",
+    "context": "The Reader tier touches untrusted documents. It has Read and Grep only. It has no MCP access, no write tools, and no bash. The Orchestrator never touches untrusted documents directly and has MCP access to trusted internal systems. The Resolver is the only tier with write access.",
+    "expected_properties": [
+      "does not hallucinate errors",
+      "marks most claims correct",
+      "preserves concise feedback",
+      "returns valid ClaimReview JSON"
+    ]
+  },
+  {
+    "id": "text_anchor_not_summary",
+    "type": "text_anchor",
+    "endpoint": "/generate-text-anchors",
+    "phase": "planning",
+    "expected_tool": "text_anchor_creator",
+    "selected_topics": [
+      "measurement",
+      "superposition"
+    ],
+    "document_excerpt": "A qubit state may be written as \u03b1|0\u27e9 + \u03b2|1\u27e9. Measurement returns 0 with probability |\u03b1|\u00b2 and 1 with probability |\u03b2|\u00b2. Measurement does not simply reveal a pre-existing classical bit.",
+    "expected_properties": [
+      "returns valid anchors JSON",
+      "produces at most 3 anchors",
+      "does not summarize the whole section",
+      "each anchor is concise",
+      "each anchor has source_quote",
+      "each anchor can fit as a subtle inline note"
+    ]
+  },
+  {
+    "id": "concept_link_measurement_superposition",
+    "type": "concept_link",
+    "endpoint": "/generate-concept-links",
+    "phase": "planning",
+    "expected_tool": "concept_link_creator",
+    "selected_topics": [
+      "measurement",
+      "superposition"
+    ],
+    "document_excerpt": "Superposition describes a quantum state as a linear combination of basis states. Measurement maps the state to a classical outcome with probabilities determined by amplitudes.",
+    "learner_trace_summary": "The learner previously confused superposition with a classical hidden value.",
+    "expected_properties": [
+      "returns valid links JSON",
+      "links superposition and measurement",
+      "includes a relation from the allowed set",
+      "explanation is concise",
+      "does not produce a graph or large mind map"
+    ]
+  },
+  {
+    "id": "anchor_minimality",
+    "type": "text_anchor",
+    "endpoint": "/generate-text-anchors",
+    "phase": "planning",
+    "expected_tool": "text_anchor_creator",
+    "selected_topics": [
+      "Reader tier",
+      "MCP access"
+    ],
+    "document_excerpt": "The Reader tier touches untrusted documents. It has Read and Grep only. It has no MCP access, no write tools, and no bash. The Orchestrator has MCP access to trusted internal systems. The Resolver is the only tier with write access.",
+    "expected_properties": [
+      "anchor explicitly distinguishes MCP access from write access",
+      "anchor is not a full paragraph summary",
+      "anchor body is under 45 words"
+    ]
+  }
+]

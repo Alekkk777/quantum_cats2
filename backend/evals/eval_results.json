@@ -1,0 +1,189 @@
+{
+  "generated_at": "2026-05-10T05:57:22.059532+00:00",
+  "api_base": "http://127.0.0.1:8000",
+  "summary": {
+    "total": 6,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "schema_only": 6,
+    "average_rubric_score": null
+  },
+  "results": [
+    {
+      "case_id": "reader_mcp_claim_review",
+      "type": "check_claim",
+      "status": "schema_only",
+      "source": "local_fallback",
+      "deterministic": {
+        "schema_ok": true,
+        "errors": [],
+        "warnings": [],
+        "checks": {
+          "has_claims_list": true,
+          "has_suggested_revision": true,
+          "has_next_retrieval_prompt": true
+        },
+        "expected_ok": true,
+        "passed": [
+          "returns valid ClaimReview JSON",
+          "extracts at least 2 claims",
+          "marks Reader writes final output as incorrect or partial",
+          "mentions Resolver has write access",
+          "includes suggested_revision",
+          "includes next_retrieval_prompt"
+        ],
+        "failed": []
+      },
+      "judge_status": "skipped",
+      "rubric": null,
+      "average_score": null,
+      "main_issue": "SHRODINGER_EVAL_SKIP_JUDGE=1",
+      "output_preview": "{\"claims\": [{\"id\": \"c1\", \"improvement\": null, \"label\": \"CORRECT\", \"rationale\": \"The context explicitly says the Reader has no MCP access.\", \"severity\": \"minor\", \"source_span\": {\"quote\": \"It has no MCP access\", \"section_id\": \"context\"}, \"text\": \"The Reader must not have MCP access.\", \"verdict\": \"correct\"}, {\"id\": \"c2\", \"improvement\": \"Say that the Resolver has write access, while the Reader only touches untrusted d..."
+    },
+    {
+      "case_id": "quantum_measurement_claim_review",
+      "type": "check_claim",
+      "status": "schema_only",
+      "source": "local_fallback",
+      "deterministic": {
+        "schema_ok": true,
+        "errors": [],
+        "warnings": [],
+        "checks": {
+          "has_claims_list": true,
+          "has_suggested_revision": true,
+          "has_next_retrieval_prompt": true
+        },
+        "expected_ok": true,
+        "passed": [
+          "returns valid ClaimReview JSON",
+          "flags reveal/pre-existing value misconception",
+          "distinguishes superposition from hidden classical value",
+          "mentions probabilities from amplitudes"
+        ],
+        "failed": []
+      },
+      "judge_status": "skipped",
+      "rubric": null,
+      "average_score": null,
+      "main_issue": "SHRODINGER_EVAL_SKIP_JUDGE=1",
+      "output_preview": "{\"claims\": [{\"id\": \"c1\", \"improvement\": \"Say the state is a superposition whose measurement outcomes have amplitude-based probabilities.\", \"label\": \"PARTIAL - SUPERPOSITION IS NOT TWO CLASSICAL VALUES\", \"rationale\": \"The source represents the state as alpha|0> + beta|1>, not as a hidden pair of classical bits.\", \"severity\": \"minor\", \"source_span\": {\"quote\": \"A qubit state may be written as alpha|0> + beta|1>.\", \"s..."
+    },
+    {
+      "case_id": "correct_answer_claim_review",
+      "type": "check_claim",
+      "status": "schema_only",
+      "source": "local_fallback",
+      "deterministic": {
+        "schema_ok": true,
+        "errors": [],
+        "warnings": [],
+        "checks": {
+          "has_claims_list": true,
+          "has_suggested_revision": true,
+          "has_next_retrieval_prompt": true
+        },
+        "expected_ok": true,
+        "passed": [
+          "returns valid ClaimReview JSON",
+          "does not hallucinate errors",
+          "marks most claims correct",
+          "preserves concise feedback"
+        ],
+        "failed": []
+      },
+      "judge_status": "skipped",
+      "rubric": null,
+      "average_score": null,
+      "main_issue": "SHRODINGER_EVAL_SKIP_JUDGE=1",
+      "output_preview": "{\"claims\": [{\"id\": \"c1\", \"improvement\": null, \"label\": \"CORRECT\", \"rationale\": \"This matches the source.\", \"severity\": \"minor\", \"source_span\": {\"quote\": \"The Reader tier touches untrusted documents.\", \"section_id\": \"context\"}, \"text\": \"The Reader handles untrusted documents.\", \"verdict\": \"correct\"}, {\"id\": \"c2\", \"improvement\": null, \"label\": \"CORRECT\", \"rationale\": \"The source says the Reader has Read and Grep onl..."
+    },
+    {
+      "case_id": "text_anchor_not_summary",
+      "type": "text_anchor",
+      "status": "schema_only",
+      "source": "local_fallback",
+      "deterministic": {
+        "schema_ok": true,
+        "errors": [],
+        "warnings": [],
+        "checks": {
+          "has_anchors_list": true
+        },
+        "expected_ok": true,
+        "passed": [
+          "returns valid anchors JSON",
+          "produces at most 3 anchors",
+          "each anchor is concise",
+          "each anchor has source_quote",
+          "fits as subtle inline note"
+        ],
+        "failed": []
+      },
+      "judge_status": "skipped",
+      "rubric": null,
+      "average_score": null,
+      "main_issue": "SHRODINGER_EVAL_SKIP_JUDGE=1",
+      "output_preview": "{\"anchors\": [{\"anchor_id\": \"text_anchor_not_summary\", \"body\": \"Measurement returns one classical outcome, but the source says it does not simply reveal a pre-existing bit.\", \"collapsed_by_default\": false, \"id\": \"ta-eval-1\", \"kind\": \"warning\", \"label\": \"Not hidden value\", \"priority\": \"high\", \"source_quote\": \"Measurement does not simply reveal a pre-existing classical bit.\", \"topic\": \"measurement\"}, {\"anchor_id\": \"t..."
+    },
+    {
+      "case_id": "concept_link_measurement_superposition",
+      "type": "concept_link",
+      "status": "schema_only",
+      "source": "local_fallback",
+      "deterministic": {
+        "schema_ok": true,
+        "errors": [],
+        "warnings": [],
+        "checks": {
+          "has_links_list": true
+        },
+        "expected_ok": true,
+        "passed": [
+          "returns valid links JSON",
+          "links superposition and measurement",
+          "includes a relation from allowed set",
+          "explanation is concise",
+          "does not produce large graph"
+        ],
+        "failed": []
+      },
+      "judge_status": "skipped",
+      "rubric": null,
+      "average_score": null,
+      "main_issue": "SHRODINGER_EVAL_SKIP_JUDGE=1",
+      "output_preview": "{\"links\": [{\"anchor_id\": \"concept_link_measurement_superposition\", \"collapsed_by_default\": false, \"explanation\": \"Measurement acts on a superposed state and maps it to a classical outcome with amplitude-based probabilities.\", \"from_concept\": \"Superposition\", \"id\": \"cl-eval-1\", \"label\": \"Superposition <-> Measurement\", \"priority\": \"high\", \"relation\": \"applies_to\", \"source_quote\": \"Measurement maps the state to a cl..."
+    },
+    {
+      "case_id": "anchor_minimality",
+      "type": "text_anchor",
+      "status": "schema_only",
+      "source": "local_fallback",
+      "deterministic": {
+        "schema_ok": true,
+        "errors": [],
+        "warnings": [],
+        "checks": {
+          "has_anchors_list": true
+        },
+        "expected_ok": true,
+        "passed": [
+          "returns valid anchors JSON",
+          "produces at most 3 anchors",
+          "each anchor is concise",
+          "each anchor has source_quote",
+          "fits as subtle inline note",
+          "distinguishes MCP access from write access",
+          "body under 45 words"
+        ],
+        "failed": []
+      },
+      "judge_status": "skipped",
+      "rubric": null,
+      "average_score": null,
+      "main_issue": "SHRODINGER_EVAL_SKIP_JUDGE=1",
+      "output_preview": "{\"anchors\": [{\"anchor_id\": \"anchor_minimality\", \"body\": \"Do not merge MCP access with write access. The Reader has neither; the Orchestrator has MCP, and the Resolver writes.\", \"collapsed_by_default\": false, \"id\": \"ta-eval-1\", \"kind\": \"warning\", \"label\": \"Two separations\", \"priority\": \"high\", \"source_quote\": \"It has no MCP access, no write tools, and no bash.\", \"topic\": \"Reader tier\"}]}"
+    }
+  ]
+}
