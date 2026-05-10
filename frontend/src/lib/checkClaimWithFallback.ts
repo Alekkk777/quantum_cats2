@@ -1,6 +1,6 @@
 import { checkClaim } from './api';
 import type { ClaimReview } from '../types';
-import readerMcpFixture from '../data/claimReviewReaderMcp.json';
+import quantumFixture from '../data/claimReviewQuantum.json';
 import { DEMO_MODE } from '../config';
 
 export async function checkClaimWithFallback(input: {
@@ -21,6 +21,6 @@ export async function checkClaimWithFallback(input: {
     return { review, usedFallback: false };
   } catch (err) {
     console.warn('[Shrodinger] /check-claim failed; using fixture fallback.', err);
-    return { review: readerMcpFixture as ClaimReview, usedFallback: true };
+    return { review: quantumFixture as ClaimReview, usedFallback: true };
   }
 }

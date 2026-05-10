@@ -1,0 +1,53 @@
+{
+  "review_title": "Bell's theorem and the three assumptions",
+  "summary": "3 claims extracted. Two treat local hidden variables as a working solution — Bell's theorem rules them out. One misidentifies which assumption must be dropped.",
+  "original_answer": "If locality holds, hidden variables can explain entanglement — realism and freedom are safe. EPR was right that quantum mechanics is incomplete.",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "Realism and freedom are both safe if locality holds.",
+      "verdict": "incorrect",
+      "label": "INCORRECT — Bell rules out local realism",
+      "rationale": "Bell's theorem proves that locality AND realism together imply Bell's inequality must hold. Experiments violate it, so if locality is assumed true, realism must be abandoned — not kept.",
+      "improvement": "If locality holds, realism must be abandoned. Bell's theorem closes the local hidden variable program: locality + realism → violated inequality → contradiction with experiment.",
+      "source_span": {
+        "section_id": "2.3",
+        "quote": "at least one of the three assumptions — locality, realism, or freedom — must be false"
+      },
+      "severity": "major"
+    },
+    {
+      "id": "c2",
+      "text": "Hidden variables can explain quantum correlations.",
+      "verdict": "incorrect",
+      "label": "INCORRECT — local hidden variables are ruled out",
+      "rationale": "Local hidden variable theories (realism + locality) are exactly what Bell's theorem and subsequent experiments refute. This is the EPR proposal — experiments show it cannot match quantum predictions.",
+      "improvement": "No local hidden variable theory can reproduce quantum correlations. Bell's experiments (1982, 2015) close this off definitively for local theories.",
+      "source_span": {
+        "section_id": "2.3",
+        "quote": "quantum mechanics predicts correlations that exceed this limit"
+      },
+      "severity": "major"
+    },
+    {
+      "id": "c3",
+      "text": "EPR was right that quantum mechanics is incomplete.",
+      "verdict": "incorrect",
+      "label": "INCORRECT — EPR's local realism is experimentally refuted",
+      "rationale": "EPR's argument assumed local hidden variables could complete quantum mechanics. Bell's theorem showed this leads to a testable inequality, and experiments violated it — refuting EPR's program.",
+      "improvement": "EPR's local realism is experimentally closed off. Quantum mechanics is not incomplete in the way EPR suggested — the correlations are genuinely non-classical.",
+      "source_span": {
+        "section_id": "2.2",
+        "quote": "quantum mechanics was simply incomplete"
+      },
+      "severity": "minor"
+    }
+  ],
+  "missing_ideas": [
+    "Bell's inequality is the mathematical consequence of locality + realism — experiments exceed it.",
+    "If locality holds, realism must be abandoned: particles have no definite properties before measurement.",
+    "Most physicists accept: locality holds, realism must go."
+  ],
+  "suggested_revision": "If locality holds, realism must be abandoned. Bell's theorem proves that locality and realism together require Bell's inequality to hold, but experiments violate it. Therefore, quantum particles cannot carry pre-existing definite properties — EPR's local hidden variable program is experimentally closed off.",
+  "next_retrieval_prompt": "In two days: what is the logical structure of Bell's theorem — which two assumptions lead to what constraint, and what do experiments reveal?"
+}

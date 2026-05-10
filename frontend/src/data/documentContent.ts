@@ -13,46 +13,44 @@ export type DocNode =
   | { kind: 'block-formula-anchor'; formula: string; explanation: string }
   | { kind: 'checkpoint-slot'; checkpointId: string };
 
-export const DOCUMENT_TITLE = 'Agent Architectures, Ch. 4 — Trust tiers';
-export const DOCUMENT_SUBTITLE = 'Agent Architectures · Chapter 4 · 12 pages · ~22 min read';
+export const DOCUMENT_TITLE = 'Quantum Mechanics, Ch. 2 — Bell\'s theorem';
+export const DOCUMENT_SUBTITLE = 'Quantum Mechanics · Chapter 2 · 8 pages · ~15 min read';
 
 export const documentNodes: DocNode[] = [
-  { kind: 'h1', text: '4 — Trust tiers in agent architectures' },
+  { kind: 'h1', text: '2 — Quantum Entanglement and Bell\'s Theorem' },
   { kind: 'sub', text: DOCUMENT_SUBTITLE },
   { kind: 'block-before-reading' },
 
-  { kind: 'p', sectionId: '4.0',
-    text: 'Modern agent systems are not single models — they are pipelines of tiers, each with a different relationship to *trust*. The fundamental design move in this chapter is to split capabilities across tiers so that no single component both **reads untrusted input** and **holds privileged tools**. This is the agent-architecture analogue of the principle of least authority.' },
+  { kind: 'p', sectionId: '2.0',
+    text: 'Quantum entanglement is one of the most counterintuitive features of modern physics. When two particles are entangled, measurements on one appear to be *instantly correlated* with measurements on the other — regardless of the distance between them. Einstein called this "spooky action at a distance" and suspected it revealed an *incompleteness* in quantum mechanics, not a genuine feature of nature. What followed was one of the most important debates in the history of science.' },
 
-  { kind: 'h2', num: '4.1', sectionId: '4.1', text: 'The three tiers' },
-  { kind: 'p', sectionId: '4.1',
-    text: 'We will work with three tiers throughout: the **Reader**, the **Planner**, and the **Resolver**. Their job descriptions are short. The **Reader** ingests untrusted documents — PDFs, scraped pages, user uploads — and produces a structured representation. The **Planner** consumes the Reader\u2019s structured output and decides what to do, but never the raw bytes. The **Resolver** executes the plan and writes the final, user-visible response.' },
+  { kind: 'h2', num: '2.1', sectionId: '2.1', text: 'The three fundamental assumptions' },
+  { kind: 'p', sectionId: '2.1',
+    text: 'Three assumptions underlie our classical picture of the world. **Locality**: an action on particle A cannot instantaneously influence particle B at a distant location — information cannot travel faster than light. **Realism**: physical properties exist and have definite values before — and independent of — any measurement; particles carry their outcomes like hidden instructions. **Freedom** (also called *statistical independence*): experimenters can choose their measurement settings freely, independent of any hidden variables in the system. Bell\'s theorem is a precise statement about what happens when you take all three seriously at once.' },
 
-  { kind: 'block-concept-link', from: '§3.2',
-    text: 'You saw **trust boundary** in the previous chapter as the line where untrusted input meets privileged action. The same line reappears below — only the actors have names now (*Reader*, *Resolver*) and the action is an *MCP tool call*.' },
+  { kind: 'block-concept-link', from: '§1.3',
+    text: 'You saw **superposition** in the previous chapter as a single particle existing in multiple states simultaneously. Entanglement extends this: two particles can share a *joint* superposition across space, so that measuring one collapses both — even when separated by kilometers.' },
 
-  { kind: 'h2', num: '4.2', sectionId: '4.2', text: 'Reader tier and MCP access' },
-  { kind: 'p', sectionId: '4.2',
-    text: 'The Reader is intentionally denied `MCP` tool access. This is a hard policy, not a default — the Reader\u2019s runtime cannot resolve a tool name to a callable. The reason is mechanical, not aesthetic: the Reader is the one tier whose input is fully *untrusted*. Any document it reads may contain prompt-injection payloads aimed at the model. If that same model could also call MCP tools, an injected instruction could become an external action — a request to a database, a webhook, an outbound email.' },
-  { kind: 'p', sectionId: '4.2',
-    text: 'The Resolver, by contrast, holds tool access. It does not see untrusted bytes; it sees a structured plan that has already passed through the Planner\u2019s typed interface. The trust boundary is therefore *between* the Reader and the Planner, and the architecture enforces it by splitting capabilities, not by asking the model to behave.' },
+  { kind: 'h2', num: '2.2', sectionId: '2.2', text: 'The EPR argument and hidden variables' },
+  { kind: 'p', sectionId: '2.2',
+    text: 'Einstein, Podolsky, and Rosen argued in 1935 that if locality holds — if measuring particle A truly cannot affect particle B — then the outcome of measuring B must have been *predetermined*. Predetermination requires hidden variables: extra information carried by the particles, invisible to quantum mechanics, that fix their outcomes before any measurement takes place. For EPR, the strange correlations were just classical correlations in disguise, and quantum mechanics was simply incomplete.' },
+
+  { kind: 'h2', num: '2.3', sectionId: '2.3', text: 'Bell\'s inequality and its experimental violation' },
+  { kind: 'p', sectionId: '2.3',
+    text: 'John Bell showed in 1964 that the combination of locality **and** realism places a precise mathematical upper bound on how strongly correlated measurement outcomes can be. This bound — Bell\'s inequality — is a provable consequence of assuming both. Crucially, quantum mechanics predicts correlations that *exceed* this limit. Experiments from Aspect (1982) to the loophole-free tests of 2015 have confirmed the violation beyond any reasonable doubt. The data forces a stark conclusion: at least one of the three assumptions — locality, realism, or freedom — must be false.' },
 
   { kind: 'block-formula-anchor',
-    formula: 'untrusted_input(tier) ∧ mcp_access(tier) ⇒ exfiltration_risk',
-    explanation: 'A tier that consumes untrusted input *and* can call MCP tools is, by construction, an exfiltration channel. The architecture below denies one of the two for each tier.' },
+    formula: 'locality ∧ realism  ⇒  |⟨AB⟩ + ⟨Ab⟩ + ⟨aB⟩ − ⟨ab⟩| ≤ 2',
+    explanation: 'The CHSH form of Bell\'s inequality: if both locality and realism hold, the correlation measure on the left cannot exceed 2. Quantum mechanics allows values up to 2√2 ≈ 2.83. Experiments consistently reach ~2.7 — well above the classical bound.' },
 
-  { kind: 'checkpoint-slot', checkpointId: 'reader-mcp' },
+  { kind: 'checkpoint-slot', checkpointId: 'bell-inequality' },
 
-  { kind: 'h2', num: '4.3', sectionId: '4.3', text: 'Why splitting beats hardening' },
-  { kind: 'p', sectionId: '4.3',
-    text: 'It is tempting to keep one model and try to *harden* it against prompt injection — system prompts, refusal training, classifier guards. These help at the margin, but they all share a structural weakness: they ask the model to remain reliable under adversarial input. Splitting the architecture removes the question. The Reader cannot exfiltrate because it cannot call. The Resolver cannot be injected because it never sees untrusted bytes.' },
-
-  { kind: 'h2', num: '4.4', sectionId: '4.4', text: 'Where outputs come from' },
-  { kind: 'p', sectionId: '4.4',
-    text: 'A subtle implication: the user-visible answer is always written by the Resolver. The Reader\u2019s outputs are internal — typed structures consumed by the Planner. If you ever find yourself writing a system where the Reader emits text directly to the user, you have collapsed the trust boundary back to one tier and lost the property the architecture was designed to give you.' },
+  { kind: 'h2', num: '2.4', sectionId: '2.4', text: 'What the violation means' },
+  { kind: 'p', sectionId: '2.4',
+    text: 'Most physicists accept that **realism must be abandoned**: quantum particles do not carry definite properties before measurement — measuring particle B does not reveal a pre-existing value, it creates one. A minority prefer abandoning **locality** instead, accepting hidden non-local influences that are undetectable from the outside. A small group invoke **superdeterminism**: abandoning freedom, claiming the experimenters\' choices are themselves correlated with the hidden variables through some past common cause. Each choice has profound consequences for what we believe physics is about.' },
 ];
 
-export const READER_MCP_QUESTION =
-  'Why is the Reader tier restricted from accessing MCP tools when handling untrusted documents?';
+export const QUANTUM_CHECKPOINT_QUESTION =
+  'If locality were confirmed experimentally, which of the three fundamental assumptions from §2.1 would have to be abandoned to account for quantum entanglement?';
 
-export const READER_MCP_CONTEXT = `§4.2 Reader tier and MCP access. The Reader is intentionally denied MCP tool access. This is a hard policy, not a default. The Reader is the one tier whose input is fully untrusted. The Resolver writes final outputs; the Reader does not. §4.4 the user-visible answer is always written by the Resolver.`;
+export const QUANTUM_CHECKPOINT_CONTEXT = `§2.1 Three fundamental assumptions. Locality: action on A cannot instantaneously affect B. Realism: properties exist as definite values before measurement (hidden variables). Freedom: measurement settings are independent of hidden variables. §2.3 Bell's theorem: locality AND realism together imply Bell's inequality must hold. Experiments violate this bound. Therefore at least one assumption must be false. §2.4 Most physicists: realism must be abandoned — particles have no definite properties before measurement. Locality is maintained in the standard view.`;

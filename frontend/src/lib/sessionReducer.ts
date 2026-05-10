@@ -37,7 +37,7 @@ export function sessionReducer(s: StudySession, a: SessionAction): StudySession 
   switch (a.type) {
     case 'start-session': {
       let next = { ...s, goal: a.goal, depth: a.depth };
-      next = patchCheckpoint(next, 'reader-mcp', { phase: 'reading' });
+      next = patchCheckpoint(next, 'bell-inequality', { phase: 'reading' });
       return pushEvent(next, evt({ glyph: '*', tone: 'indigo', text: 'Route generated - 4 stops planned.', meta: '14:02', now: true }));
     }
     case 'set-answer':
@@ -49,7 +49,7 @@ export function sessionReducer(s: StudySession, a: SessionAction): StudySession 
       return patchCheckpoint(s, a.checkpointId, { hintShown: true });
     case 'open-checkpoint': {
       const next = patchCheckpoint(s, a.checkpointId, { phase: 'open' });
-      return pushEvent(next, evt({ glyph: '[]', tone: 'indigo', text: 'Checkpoint inserted at section 4.2 - fragile concept.', meta: '14:04', now: true }));
+      return pushEvent(next, evt({ glyph: '[]', tone: 'indigo', text: 'Checkpoint inserted at section 2.3 - fragile concept.', meta: '14:04', now: true }));
     }
     case 'submit-start':
       return patchCheckpoint(s, a.checkpointId, { loading: true, error: null, usedFallback: false });
@@ -102,8 +102,8 @@ export function sessionReducer(s: StudySession, a: SessionAction): StudySession 
 
       const recall: RecallItem[] = [
         { id: nid(), prompt: cp.review.next_retrieval_prompt, conceptId: cp.id, scheduledFor: '+2d', source: cp.sectionId },
-        { id: nid(), prompt: 'Why is the Reader denied MCP access?', conceptId: cp.id, scheduledFor: '+6d', source: cp.sectionId },
-        { id: nid(), prompt: 'How does prompt injection become exfiltration through tools?', conceptId: cp.id, scheduledFor: '+14d', source: cp.sectionId },
+        { id: nid(), prompt: "Which of the three assumptions must be abandoned if locality is confirmed?", conceptId: cp.id, scheduledFor: '+6d', source: cp.sectionId },
+        { id: nid(), prompt: "What does Bell's inequality bound, and what do loophole-free experiments show?", conceptId: cp.id, scheduledFor: '+14d', source: cp.sectionId },
       ];
 
       const updatedClaims = cp.review.claims.map((c) =>

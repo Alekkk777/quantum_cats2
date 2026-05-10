@@ -22,6 +22,11 @@ from orchestrator import (
     genera_domanda_checkpoint,
     genera_domande_pianificazione,
 )
+from make_questions_mcp import (
+    challenge_claim_live,
+    generate_text_anchors_live,
+    generate_concept_links_live,
+)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
@@ -238,6 +243,70 @@ async def transcribe(file: UploadFile = File(...)):
         "text": transcription.text,
         "language_code": transcription.language_code or None,
     }
+
+
+# ── Augmentation + debate endpoints ───────────────────────────────────────
+
+class ChallengeClaimRequest(BaseModel):
+    claim_text: str
+    claim_verdict: str
+    student_challenge: str
+    original_question: str
+    context: str
+    history: list = []
+    demo_mode: bool = False
+
+
+class GenerateTextAnchorsRequest(BaseModel):
+    document_id: str
+    selected_topics: list = []
+    document_excerpt: str
+    demo_mode: bool = False
+
+
+class GenerateConceptLinksRequest(BaseModel):
+    document_id: str
+    selected_topics: list = []
+    document_excerpt: str
+    learner_trace_summary: str | None = None
+    demo_mode: bool = False
+
+
+@app.post("/challenge-claim")
+async def challenge_claim_endpoint(req: ChallengeClaimRequest):
+    """Schrödinger responds to the student's challenge on a specific claim."""
+    return challenge_claim_live(
+        claim_text=req.claim_text,
+        claim_verdict=req.claim_verdict,
+        student_challenge=req.student_challenge,
+        original_question=req.original_question,
+        context=req.context,
+        history=req.history,
+        demo_mode=req.demo_mode,
+    )
+
+
+@app.post("/generate-text-anchors")
+async def generate_text_anchors_endpoint(req: GenerateTextAnchorsRequest):
+    """Generate subtle text anchors for a document excerpt."""
+    return generate_text_anchors_live(
+        _document_id=req.document_id,
+        selected_topics=req.selected_topics,
+        document_excerpt=req.document_excerpt,
+        demo_mode=req.demo_mode,
+    )
+
+
+@app.post("/generate-concept-links")
+async def generate_concept_links_endpoint(req: GenerateConceptLinksRequest):
+    """Generate concept link annotations for a document."""
+    return generate_concept_links_live(
+        _document_id=req.document_id,
+        selected_topics=req.selected_topics,
+        document_excerpt=req.document_excerpt,
+        learner_trace_summary=req.learner_trace_summary,
+        demo_mode=req.demo_mode,
+    )
 
 
 if __name__ == "__main__":

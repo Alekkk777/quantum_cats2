@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cl-1",
+    "from_concept": "Locality",
+    "to_concept": "Realism",
+    "relation": "often_confused_with",
+    "anchor_id": "2.1",
+    "label": "Locality ↔ Realism",
+    "explanation": "Students conflate these. Locality is about causal influence speed; realism is about whether properties are pre-defined. Bell's theorem requires both to derive the classical bound — violating the bound only tells you at least one fails.",
+    "source_quote": "Three assumptions underlie our classical picture of the world",
+    "priority": "high",
+    "collapsed_by_default": false
+  },
+  {
+    "id": "cl-2",
+    "from_concept": "Bell's inequality",
+    "to_concept": "EPR argument",
+    "relation": "contrast",
+    "anchor_id": "2.3",
+    "label": "Bell's inequality vs EPR",
+    "explanation": "EPR argued hidden variables must exist given locality. Bell showed hidden variables with locality imply a testable bound. Experiments refute the bound, experimentally closing the EPR program.",
+    "source_quote": "John Bell showed in 1964 that the combination of locality and realism places a precise mathematical upper bound",
+    "priority": "high",
+    "collapsed_by_default": false
+  },
+  {
+    "id": "cl-3",
+    "from_concept": "Superposition",
+    "to_concept": "Entanglement",
+    "relation": "causes",
+    "anchor_id": "2.0",
+    "label": "Superposition → Entanglement",
+    "explanation": "Entanglement is superposition over a joint two-particle Hilbert space. Measuring one particle collapses the shared state, which is why the other particle's result is instantly correlated regardless of distance.",
+    "source_quote": "two particles can share a joint superposition across space",
+    "priority": "medium",
+    "collapsed_by_default": true
+  }
+]

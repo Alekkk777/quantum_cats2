@@ -1,0 +1,37 @@
+import type { TextAnchor } from '../types';
+
+export const textAnchorsDemo: TextAnchor[] = [
+  {
+    id: 'ta-1',
+    anchor_id: '2.1',
+    topic: 'Locality and realism distinction',
+    kind: 'assumption',
+    label: 'Hidden assumption',
+    body: 'Realism and locality are independent assumptions. Students routinely conflate them. Locality limits causal speed; realism asserts pre-existing definite values. Bell\'s theorem requires both simultaneously to derive the classical bound.',
+    source_quote: 'physical properties exist and have definite values before — and independent of — any measurement',
+    priority: 'high',
+    collapsed_by_default: false,
+  },
+  {
+    id: 'ta-2',
+    anchor_id: '2.3',
+    topic: 'Bell\'s inequality',
+    kind: 'formula',
+    label: 'Formula anchor',
+    body: 'The CHSH bound of 2 follows from locality and realism together — neither alone. Quantum mechanics predicts up to 2√2 ≈ 2.83. Experiments consistently reach ~2.7, well above the classical ceiling.',
+    source_quote: 'Bell\'s inequality — is a provable consequence of assuming both',
+    priority: 'high',
+    collapsed_by_default: false,
+  },
+  {
+    id: 'ta-3',
+    anchor_id: '2.4',
+    topic: 'Interpretations after violation',
+    kind: 'warning',
+    label: 'Keep this distinction',
+    body: 'Most physicists abandon realism (Copenhagen / relational QM). Bohmian mechanics abandons locality instead. Superdeterminism abandons freedom. These are not equivalent — each has deep consequences for what physics means.',
+    source_quote: 'Most physicists accept that realism must be abandoned',
+    priority: 'medium',
+    collapsed_by_default: true,
+  },
+];

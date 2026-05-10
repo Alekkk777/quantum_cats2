@@ -2,15 +2,15 @@ import type { LearningTraceState } from '../types';
 
 export const initialTrace: LearningTraceState = {
   concept: {
-    id: 'reader-mcp',
-    title: 'Reader tier and MCP access',
-    sectionLabel: '4.2',
+    id: 'bell-inequality',
+    title: "Bell's theorem and the three assumptions",
+    sectionLabel: '2.3',
     fragility: 'fragile',
     strength: 8,
     rationale:
-      'Students confuse Reader and Resolver in 41% of explanations of this paragraph. You also moved through section 4.2 quickly, which can signal fluent reading with shallow encoding.',
+      "Students confuse 'local hidden variables solve entanglement' with the actual conclusion in 54% of explanations of this section. Bell's theorem is frequently misread as allowing local realism.",
     signals: [
-      'fragile-concept registry / section 4.2 flagged',
+      'fragile-concept registry / section 2.3 flagged',
       'dwell time below threshold',
       'no prior retrieval on this concept',
     ],
@@ -20,6 +20,6 @@ export const initialTrace: LearningTraceState = {
   fossils: [],
   recall: [],
   events: [
-    { id: 'e1', glyph: '-', tone: 'neutral', text: 'Session opened.', meta: 'agent-arch.pdf', at: new Date().toISOString() },
+    { id: 'e1', glyph: '-', tone: 'neutral', text: 'Session opened.', meta: 'quantum-mechanics.pdf', at: new Date().toISOString() },
   ],
 };

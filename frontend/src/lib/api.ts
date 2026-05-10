@@ -1,4 +1,4 @@
-import type { ClaimReview } from '../types';
+import type { ClaimReview, TextAnchor, ConceptLink, ChallengeClaimResponse, DebateEntry } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000';
 
@@ -146,6 +146,65 @@ export async function recordInteraction(data: {
   sezione_attuale_id: string;
 }): Promise<{ status: string; nuovo_stato: UserBrainState; mutazioni_conseguenti: Mutazione[] }> {
   return request('/api/interact', { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function challengeClaim(input: {
+  claimText: string;
+  claimVerdict: string;
+  studentChallenge: string;
+  originalQuestion: string;
+  context: string;
+  history: DebateEntry[];
+  demoMode?: boolean;
+}): Promise<ChallengeClaimResponse> {
+  return request('/challenge-claim', {
+    method: 'POST',
+    body: JSON.stringify({
+      claim_text: input.claimText,
+      claim_verdict: input.claimVerdict,
+      student_challenge: input.studentChallenge,
+      original_question: input.originalQuestion,
+      context: input.context,
+      history: input.history,
+      demo_mode: input.demoMode ?? false,
+    }),
+  });
+}
+
+export async function generateTextAnchors(input: {
+  documentId: string;
+  selectedTopics?: string[];
+  documentExcerpt: string;
+  demoMode?: boolean;
+}): Promise<{ anchors: TextAnchor[] }> {
+  return request('/generate-text-anchors', {
+    method: 'POST',
+    body: JSON.stringify({
+      document_id: input.documentId,
+      selected_topics: input.selectedTopics ?? [],
+      document_excerpt: input.documentExcerpt,
+      demo_mode: input.demoMode ?? false,
+    }),
+  });
+}
+
+export async function generateConceptLinks(input: {
+  documentId: string;
+  selectedTopics?: string[];
+  documentExcerpt: string;
+  learnerTraceSummary?: string | null;
+  demoMode?: boolean;
+}): Promise<{ links: ConceptLink[] }> {
+  return request('/generate-concept-links', {
+    method: 'POST',
+    body: JSON.stringify({
+      document_id: input.documentId,
+      selected_topics: input.selectedTopics ?? [],
+      document_excerpt: input.documentExcerpt,
+      learner_trace_summary: input.learnerTraceSummary ?? null,
+      demo_mode: input.demoMode ?? false,
+    }),
+  });
 }
 
 export { ApiError };

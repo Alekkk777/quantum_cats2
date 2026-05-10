@@ -4,12 +4,17 @@ import type { StudySession } from '../types';
 
 interface SetupOverlayProps {
   open: boolean;
-  onStart: (cfg: { goal: StudySession['goal']; depth: StudySession['depth']; doc: string }) => void;
+  onStart: (cfg: {
+    mode: 'demo' | 'live';
+    goal: StudySession['goal'];
+    depth: StudySession['depth'];
+    doc: string;
+  }) => void;
 }
 
 const docs: Array<[string, string, string]> = [
+  ['quantum-ent', 'Quantum Mechanics, Ch. 2', "Bell's theorem / Entanglement / 8 pp"],
   ['agent-arch', 'Agent Architectures, Ch. 4', 'Reader / Resolver / MCP / 12 pp'],
-  ['linalg', 'Linear Algebra Done Right, Ch. 5', 'Eigenvalues / 18 pp'],
   ['biochem', 'Lehninger Biochemistry, Ch. 14', 'Glycolysis / 22 pp'],
 ];
 
@@ -21,17 +26,19 @@ const goals: Array<[StudySession['goal'], string]> = [
 ];
 
 const depths: Array<[StudySession['depth'], string]> = [
-  ['light', 'Light - 1 checkpoint / page'],
-  ['rigorous', 'Rigorous - checkpoints at every fragile concept'],
-  ['oral', 'Oral defense - explain everything'],
+  ['light', 'Light — 1 checkpoint / page'],
+  ['rigorous', 'Rigorous — checkpoints at every fragile concept'],
+  ['oral', 'Oral defense — explain everything'],
 ];
 
 export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
-  const [doc, setDoc] = useState('agent-arch');
+  const [mode, setMode] = useState<'demo' | 'live'>('demo');
+  const [doc, setDoc] = useState('quantum-ent');
   const [goal, setGoal] = useState<StudySession['goal']>('exam');
   const [depth, setDepth] = useState<StudySession['depth']>('rigorous');
 
   if (!open) return null;
+
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/30 backdrop-blur-md" data-screen-label="Setup">
       <div
@@ -44,21 +51,40 @@ export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
             <div className="label-mono text-indigo">Open the box of understanding</div>
             <h2 className="font-serif text-[26px] font-semibold -tracking-[0.015em] mt-1">Set up this study session.</h2>
             <p className="font-serif text-[15px] text-ink-2 leading-snug mt-1">
-              Shrodinger does not summarize for you. It inserts checkpoints into your document so your understanding becomes <em>observable</em>.
+              Shrodinger inserts checkpoints so your understanding becomes <em>observable</em>.
             </p>
           </div>
         </div>
 
-        <Field label="Document">
-          <div className="flex gap-1.5 flex-wrap">
-            {docs.map(([id, name, sub]) => (
-              <SegBtn key={id} on={doc === id} onClick={() => setDoc(id)} className="flex-1 min-w-0 flex flex-col gap-0.5 items-start">
-                <span className="font-serif text-[14px] font-semibold">{name}</span>
-                <span className="font-mono text-[10px] text-ink-4 tracking-[0.04em]">{sub}</span>
-              </SegBtn>
-            ))}
+        {/* Mode toggle */}
+        <div className="flex gap-px mb-4 p-1 rounded-lg bg-paper-2 border border-rule w-fit">
+          <ModeBtn active={mode === 'demo'} onClick={() => setMode('demo')}>Demo</ModeBtn>
+          <ModeBtn active={mode === 'live'} onClick={() => setMode('live')}>Live — upload your doc</ModeBtn>
+        </div>
+
+        {mode === 'demo' ? (
+          <Field label="Document">
+            <div className="flex gap-1.5 flex-wrap">
+              {docs.map(([id, name, sub]) => (
+                <SegBtn key={id} on={doc === id} onClick={() => setDoc(id)} className="flex-1 min-w-0 flex flex-col gap-0.5 items-start">
+                  <span className="font-serif text-[14px] font-semibold">{name}</span>
+                  <span className="font-mono text-[10px] text-ink-4 tracking-[0.04em]">{sub}</span>
+                </SegBtn>
+              ))}
+            </div>
+          </Field>
+        ) : (
+          <div className="mb-3 px-4 py-3.5 rounded-md border border-rule bg-paper-2">
+            <p className="font-serif text-[14.5px] text-ink-2 leading-relaxed">
+              After clicking <strong className="text-ink">Begin</strong>, you'll upload any PDF, Markdown, or text file.
+              Shrodinger will extract your document, generate study checkpoints, and insert subtle anchors — all live.
+            </p>
+            <p className="mt-1.5 font-mono text-[10px] text-ink-4 tracking-[0.04em]">
+              Backend must be running at localhost:8000
+            </p>
           </div>
-        </Field>
+        )}
+
         <Field label="Study goal">
           <div className="flex gap-1.5 flex-wrap">
             {goals.map(([id, label]) => (
@@ -66,6 +92,7 @@ export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
             ))}
           </div>
         </Field>
+
         <Field label="Intervention depth">
           <div className="flex gap-1.5 flex-wrap">
             {depths.map(([id, label]) => (
@@ -76,7 +103,12 @@ export function SetupOverlay({ open, onStart }: SetupOverlayProps) {
 
         <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-rule">
           <span className="font-serif italic text-[13px] text-ink-3">Until you use it, your understanding is unobserved.</span>
-          <button className="btn btn-indigo" onClick={() => onStart({ goal, depth, doc })}>Begin study mode</button>
+          <button
+            className="btn btn-indigo"
+            onClick={() => onStart({ mode, goal, depth, doc })}
+          >
+            Begin study mode
+          </button>
         </div>
       </div>
     </div>
@@ -92,7 +124,25 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function SegBtn({ on, children, className = '', ...rest }: { on: boolean; children: React.ReactNode; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+function ModeBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-md text-[12px] font-mono tracking-[0.04em] transition-colors ${
+        active ? 'bg-indigo text-paper font-semibold' : 'text-ink-3 hover:text-ink'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SegBtn({
+  on,
+  children,
+  className = '',
+  ...rest
+}: { on: boolean; children: React.ReactNode; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       {...rest}

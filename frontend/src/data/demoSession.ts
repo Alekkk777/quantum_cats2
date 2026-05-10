@@ -1,23 +1,23 @@
 import type { StudySession } from '../types';
 import { initialTrace } from './initialTrace';
-import { READER_MCP_QUESTION } from './documentContent';
+import { QUANTUM_CHECKPOINT_QUESTION } from './documentContent';
 
 export const STUDENT_WRONG_ANSWER =
-  'The Reader must not have MCP access because it writes the final output, so it could leak data.';
+  'If locality holds, hidden variables can explain entanglement — realism and freedom are safe. EPR was right that quantum mechanics is incomplete.';
 
 export const demoSession: StudySession = {
   id: 'sess-001',
-  documentId: 'agent-arch-ch4',
-  documentTitle: 'Agent Architectures, Ch. 4',
+  documentId: 'quantum-ent-ch2',
+  documentTitle: "Quantum Mechanics, Ch. 2 — Bell's theorem",
   goal: 'exam',
   depth: 'rigorous',
   startedAt: new Date().toISOString(),
   trace: initialTrace,
   checkpoints: {
-    'reader-mcp': {
-      id: 'reader-mcp',
-      sectionId: '4.2',
-      question: READER_MCP_QUESTION,
+    'bell-inequality': {
+      id: 'bell-inequality',
+      sectionId: '2.3',
+      question: QUANTUM_CHECKPOINT_QUESTION,
       answer: '',
       answerContext: null,
       hintShown: false,
@@ -29,5 +29,5 @@ export const demoSession: StudySession = {
       usedFallback: false,
     },
   },
-  activeCheckpointId: 'reader-mcp',
+  activeCheckpointId: 'bell-inequality',
 };

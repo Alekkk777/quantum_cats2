@@ -10,7 +10,7 @@ interface DemoControlsProps {
 
 const phaseLabel: Record<DemoControlsProps['phase'], string> = {
   setup:     'Set up session',
-  reading:   'Reading 4.2',
+  reading:   'Reading §2.3',
   open:      'Open the box',
   measuring: 'Claim measurement',
   revising:  'Revising claim',

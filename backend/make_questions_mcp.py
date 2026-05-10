@@ -1,10 +1,14 @@
 import json
+import os
+import re
 from typing import Literal, Optional, List, Any
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from langchain.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
+
+FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
 load_dotenv()
 
@@ -310,6 +314,186 @@ Source context:
         review = _fallback_review(question, answer, context)
 
     return review.model_dump_json(indent=2)
+
+
+# -----------------------------
+# 4. Challenge / debate tool
+# -----------------------------
+
+def challenge_claim_live(
+    claim_text: str,
+    claim_verdict: str,
+    student_challenge: str,
+    original_question: str,
+    context: str,
+    history: list,
+    demo_mode: bool = False,
+) -> dict:
+    """Schrödinger responds to a student's claim challenge."""
+    if demo_mode:
+        return {
+            "response": (
+                "I understand your challenge, but consider: Bell's inequality is not just about "
+                "correlation strength — it establishes a mathematical bound that locality and realism "
+                "together require. The experimental violations exceed this bound by a factor that rules "
+                "out all local realistic models. Which specific step of Bell's derivation do you find "
+                "unconvincing?"
+            ),
+            "stance": "affirm",
+        }
+
+    history_text = "\n".join(
+        f"{'Student' if h.get('role') == 'student' else 'Schrödinger'}: {h.get('text', '')}"
+        for h in history
+    )
+
+    prompt = f"""You are Schrödinger, an academic study companion embedded in a physics learning app.
+
+A student has challenged your claim assessment.
+
+Source context:
+{context}
+
+Original question: {original_question}
+Your assessment: "{claim_text}" — verdict: {claim_verdict}
+Student's challenge: {student_challenge}
+{"Prior exchanges:\\n" + history_text if history_text else ""}
+
+Respond in 2-3 sentences:
+- If the student raises a valid point, concede partially or fully
+- If the student is mistaken, explain precisely why without being condescending
+- End with a short probing follow-up question
+- Be Socratic: guide through questions rather than assertions
+
+Return ONLY valid JSON: {{"response": "...", "stance": "affirm|concede|partial_concede"}}""".strip()
+
+    try:
+        llm = _get_llm()
+        response = llm.invoke(prompt)
+        text = _message_content_to_text(response.content)
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            data = json.loads(match.group())
+            return {
+                "response": data.get("response", "Let me reconsider."),
+                "stance": data.get("stance", "affirm"),
+            }
+    except Exception as e:
+        print(f"[challenge_claim fallback] {type(e).__name__}: {e}")
+
+    return {
+        "response": (
+            "Your challenge is noted. Consider: the experimental violation exceeds "
+            "the classical bound by more than 40σ — what alternative explanation "
+            "could survive this margin?"
+        ),
+        "stance": "affirm",
+    }
+
+
+# -----------------------------
+# 5. Text anchor / concept link tools
+# -----------------------------
+
+def generate_text_anchors_live(
+    _document_id: str,
+    selected_topics: list,
+    document_excerpt: str,
+    demo_mode: bool = False,
+) -> dict:
+    """Generate subtle text anchors for a document excerpt."""
+    if demo_mode:
+        with open(os.path.join(FIXTURES_DIR, "text_anchors_demo.json"), encoding="utf-8") as f:
+            return {"anchors": json.load(f)}
+
+    topics_str = ", ".join(selected_topics) if selected_topics else "all topics"
+    prompt = f"""You are Schrödinger, an academic study companion.
+
+Generate exactly 3 text anchors for the source excerpt below.
+Focus on: {topics_str}
+
+Rules:
+- Each anchor must be tied to a specific quote from the source.
+- anchor_id must match one of: "2.0", "2.1", "2.2", "2.3", "2.4"
+- kind must be one of: definition, formula, warning, context, assumption, example
+- priority must be one of: low, medium, high
+- body must be 1-2 short sentences. No summaries. No generic advice.
+- source_quote must be a short verbatim or near-verbatim excerpt.
+
+Source:
+{document_excerpt[:2000]}
+
+Return ONLY valid JSON: {{"anchors": [{{
+  "id": "ta-1", "anchor_id": "2.X", "topic": "...", "kind": "...",
+  "label": "...", "body": "...", "source_quote": "...",
+  "priority": "high|medium|low", "collapsed_by_default": false
+}}, ...]}}""".strip()
+
+    try:
+        llm = _get_llm()
+        response = llm.invoke(prompt)
+        text = _message_content_to_text(response.content)
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            data = json.loads(match.group())
+            return {"anchors": data.get("anchors", [])}
+    except Exception as e:
+        print(f"[generate_text_anchors fallback] {type(e).__name__}: {e}")
+
+    with open(os.path.join(FIXTURES_DIR, "text_anchors_demo.json"), encoding="utf-8") as f:
+        return {"anchors": json.load(f)}
+
+
+def generate_concept_links_live(
+    _document_id: str,
+    selected_topics: list,
+    document_excerpt: str,
+    learner_trace_summary: Optional[str],
+    demo_mode: bool = False,
+) -> dict:
+    """Generate concept link annotations for a document."""
+    if demo_mode:
+        with open(os.path.join(FIXTURES_DIR, "concept_links_demo.json"), encoding="utf-8") as f:
+            return {"links": json.load(f)}
+
+    topics_str = ", ".join(selected_topics) if selected_topics else "all topics"
+    prompt = f"""You are Schrödinger, an academic study companion.
+
+Generate exactly 3 concept links for the source excerpt below.
+Focus on: {topics_str}
+
+Rules:
+- Each link connects two concepts from the source.
+- anchor_id must match one of: "2.0", "2.1", "2.2", "2.3", "2.4"
+- relation must be one of: prerequisite, contrast, causes, supports, example_of, often_confused_with, applies_to
+- explanation must be 1-2 short sentences. Ground in the source only.
+- label format: "A ↔ B"
+
+Source:
+{document_excerpt[:2000]}
+
+{"Learner trace: " + learner_trace_summary if learner_trace_summary else ""}
+
+Return ONLY valid JSON: {{"links": [{{
+  "id": "cl-1", "from_concept": "...", "to_concept": "...",
+  "relation": "...", "anchor_id": "2.X",
+  "label": "... ↔ ...", "explanation": "...", "source_quote": "...",
+  "priority": "high|medium|low", "collapsed_by_default": false
+}}, ...]}}""".strip()
+
+    try:
+        llm = _get_llm()
+        response = llm.invoke(prompt)
+        text = _message_content_to_text(response.content)
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            data = json.loads(match.group())
+            return {"links": data.get("links", [])}
+    except Exception as e:
+        print(f"[generate_concept_links fallback] {type(e).__name__}: {e}")
+
+    with open(os.path.join(FIXTURES_DIR, "concept_links_demo.json"), encoding="utf-8") as f:
+        return {"links": json.load(f)}
 
 
 @tool

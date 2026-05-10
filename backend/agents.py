@@ -21,19 +21,19 @@ class OutputAgente(BaseModel):
 
 
 async def tool_agente_inquisitore(testo_chunk: str, lacune: list):
-    """Genera Frizione (Ricordo e Applicazione)"""
-    lacune_str = ", ".join(lacune) if lacune else "concetti principali del testo"
+    """Generate Friction mutations (Memory and Application)"""
+    lacune_str = ", ".join(lacune) if lacune else "the main concepts in the text"
     prompt = f"""
-    Sei un Inquisitore accademico. Analizza questo testo:
+    You are an academic Inquisitor. Analyze this text:
     {testo_chunk}
 
-    Le lacune note dello studente sono: {lacune_str}
+    The student's known gaps are: {lacune_str}
 
-    Genera ESATTAMENTE 2 mutazioni JSON:
-    1. Un 'cloze': oscura una parola chiave del testo (usa ___ per la parola mancante nel campo 'contenuto'). Il campo 'target' deve essere la parola esatta nel testo.
-    2. Una 'domanda_inline': una domanda critica di applicazione sul concetto principale.
+    Generate EXACTLY 2 JSON mutations:
+    1. A 'cloze': hide a key word from the text (use ___ for the missing word in the 'contenuto' field). The 'target' field must be the exact word from the text.
+    2. A 'domanda_inline': a critical application question about the main concept.
 
-    Rispondi SOLO con JSON valido seguendo lo schema fornito.
+    Reply ONLY with valid JSON following the provided schema.
     """
     response = await asyncio.to_thread(
         model.generate_content,
@@ -48,16 +48,16 @@ async def tool_agente_inquisitore(testo_chunk: str, lacune: list):
 
 
 async def tool_agente_mentore(testo_chunk: str):
-    """Genera Supporto (Comprensione e Rielaborazione)"""
+    """Generate Support mutations (Understanding and Elaboration)"""
     prompt = f"""
-    Sei uno Study Companion. Analizza questo testo:
+    You are a Study Companion. Analyze this text:
     {testo_chunk}
 
-    Genera ESATTAMENTE 2 mutazioni JSON:
-    1. Un 'insight': spiega un concetto ostico con un esempio pratico e concreto.
-    2. Un 'confronto': evidenzia la differenza tra due concetti del testo.
+    Generate EXACTLY 2 JSON mutations:
+    1. An 'insight': explain a difficult concept with a practical, concrete example.
+    2. A 'confronto': highlight the difference between two concepts in the text.
 
-    Rispondi SOLO con JSON valido seguendo lo schema fornito.
+    Reply ONLY with valid JSON following the provided schema.
     """
     response = await asyncio.to_thread(
         model.generate_content,

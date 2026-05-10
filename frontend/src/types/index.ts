@@ -110,3 +110,59 @@ export interface StudySession {
   checkpoints: Record<string, CheckpointState>;
   activeCheckpointId: string | null;
 }
+
+// ── Augmentation types ────────────────────────────────────────────────────
+export type AnchorKind =
+  | 'definition'
+  | 'formula'
+  | 'warning'
+  | 'context'
+  | 'assumption'
+  | 'example';
+
+export type AugmentationPriority = 'low' | 'medium' | 'high';
+
+export type ConceptRelation =
+  | 'prerequisite'
+  | 'contrast'
+  | 'causes'
+  | 'supports'
+  | 'example_of'
+  | 'often_confused_with'
+  | 'applies_to';
+
+export interface TextAnchor {
+  id: string;
+  anchor_id: string;       // matches sectionId in DocNode
+  topic: string;
+  kind: AnchorKind;
+  label: string;
+  body: string;
+  source_quote: string;
+  priority: AugmentationPriority;
+  collapsed_by_default: boolean;
+}
+
+export interface ConceptLink {
+  id: string;
+  from_concept: string;
+  to_concept: string;
+  relation: ConceptRelation;
+  anchor_id: string;       // matches sectionId in DocNode
+  label: string;
+  explanation: string;
+  source_quote: string;
+  priority: AugmentationPriority;
+  collapsed_by_default: boolean;
+}
+
+// ── Challenge debate ──────────────────────────────────────────────────────
+export interface DebateEntry {
+  role: 'student' | 'shrodinger';
+  text: string;
+}
+
+export interface ChallengeClaimResponse {
+  response: string;
+  stance: 'affirm' | 'concede' | 'partial_concede';
+}

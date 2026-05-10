@@ -62,28 +62,28 @@ def controlla_claim_checkpoint(
 
 def genera_domande_pianificazione():
     """
-    Questa funzione viene chiamata da React appena l'utente carica il PDF.
-    Serve a tenere l'utente occupato mentre il backend fa il Chunking,
-    e contemporaneamente ci fornisce i dati per creare la "Persona".
+    Called by React as soon as the user uploads the PDF.
+    Keeps the user engaged while the backend is chunking,
+    and provides data to build the "Persona" profile.
     """
     return {
-        "fase": "Pianificazione",
-        "titolo_ui": "Impostiamo il tuo Study Engine...",
+        "fase": "Planning",
+        "titolo_ui": "Setting up your Study Engine...",
         "domande": [
             {
                 "id": "q1_obiettivo",
-                "testo": "Qual è il tuo obiettivo con questo documento?",
-                "opzioni": ["Ripasso per un esame", "Prima lettura esplorativa", "Ricerca concetti specifici"]
+                "testo": "What is your goal with this document?",
+                "opzioni": ["Review for an exam", "First exploratory read", "Look up specific concepts"]
             },
             {
                 "id": "q2_tempo",
-                "testo": "Quanto tempo hai a disposizione oggi?",
-                "opzioni": ["Poco (Vado di fretta)", "Il giusto (30-60 min)", "Molto (Voglio approfondire)"]
+                "testo": "How much time do you have today?",
+                "opzioni": ["Short (I'm in a hurry)", "Enough (30-60 min)", "Plenty (I want to go deep)"]
             },
             {
                 "id": "q3_conoscenza_pregressa",
-                "testo": "Come valuti la tua preparazione attuale su questi argomenti?",
-                "opzioni": ["Parto da zero", "Ho delle basi", "Sono un esperto, mettimi alla prova"]
+                "testo": "How would you rate your current preparation on these topics?",
+                "opzioni": ["Starting from scratch", "I have some background", "I'm an expert — challenge me"]
             }
         ]
     }
