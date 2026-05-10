@@ -1,0 +1,17 @@
+{
+  "utente_id": "nuovo_studente",
+  "grafo_conoscenza": {
+    "acquisiti": [],
+    "in_corso": [],
+    "lacune": []
+  },
+  "persona_comportamentale": {
+    "velocita": "media",
+    "frizione_preferita": "bilanciata",
+    "errori_consecutivi": 0
+  },
+  "sessione": {
+    "interazioni_totali": 0,
+    "ultimo_aggiornamento": ""
+  }
+}

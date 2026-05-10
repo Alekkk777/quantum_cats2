@@ -1,0 +1,22 @@
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+.env
+
+# Node / Frontend
+frontend/
+.DS_Store
+
+backend/gdg26/
+__pycache__/
+*.pyc
+.env
+
+# remove npm cache
+npm-debug.log
+yarn-error.log
+
+.npm-cache/
+*.bin/
+react-app/node_modules/
