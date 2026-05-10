@@ -27,6 +27,11 @@ from make_questions_mcp import (
     generate_text_anchors_live,
     generate_concept_links_live,
 )
+from braynr_trace import (
+    build_orchestrator_context,
+    enrich_profile_with_braynr_trace,
+    merge_learner_trace_summary,
+)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
@@ -157,7 +162,7 @@ async def get_sections():
 async def start_study_mode(request: StudyRequest):
     """React chiama questo quando l'utente inizia a leggere una sezione."""
     testo_chunk = recupera_chunk_vettoriale(request.sezione_id)
-    profilo = leggi_user_brain()
+    profilo = enrich_profile_with_braynr_trace(leggi_user_brain(), testo_chunk)
 
     try:
         mutazioni = await genera_documento_vivente(request.sezione_id, testo_chunk, profilo)
@@ -177,10 +182,11 @@ async def handle_user_interaction(request: InteractionRequest):
     """React chiama questo in background quando l'utente risponde a una mutazione."""
     nuovo_profilo = aggiorna_user_brain(request.concetto_target, request.esito)
     testo_chunk = recupera_chunk_vettoriale(request.sezione_attuale_id)
+    profilo_arricchito = enrich_profile_with_braynr_trace(nuovo_profilo, testo_chunk)
 
     try:
         nuove_mutazioni = await genera_documento_vivente(
-            request.sezione_attuale_id, testo_chunk, nuovo_profilo
+            request.sezione_attuale_id, testo_chunk, profilo_arricchito
         )
     except Exception as e:
         print(f"[interact error] {type(e).__name__}: {e}")
@@ -188,7 +194,7 @@ async def handle_user_interaction(request: InteractionRequest):
 
     return {
         "status": "grafo_aggiornato",
-        "nuovo_stato": nuovo_profilo.get("grafo_conoscenza", {}),
+        "nuovo_stato": profilo_arricchito.get("grafo_conoscenza", {}),
         "mutazioni_conseguenti": nuove_mutazioni,
     }
 
@@ -198,17 +204,19 @@ async def handle_user_interaction(request: InteractionRequest):
 @app.post("/generate-question")
 async def generate_question_endpoint(req: GenerateQuestionRequest):
     """Genera una domanda checkpoint per il documento corrente."""
-    result = genera_domanda_checkpoint(topic=req.topic, context=req.context)
+    enriched_context = build_orchestrator_context(req.context)
+    result = genera_domanda_checkpoint(topic=req.topic, context=enriched_context)
     return {"question": result}
 
 
 @app.post("/check-claim")
 async def check_claim_endpoint(req: CheckClaimRequest):
     """Valuta le claim della risposta dello studente."""
+    enriched_context = build_orchestrator_context(req.context)
     return controlla_claim_checkpoint(
         question=req.question,
         answer=req.answer,
-        context=req.context,
+        context=enriched_context,
         demo_mode=req.demo_mode,
         answer_context=req.answer_context,
     )
@@ -280,12 +288,13 @@ class GenerateConceptLinksRequest(BaseModel):
 @app.post("/challenge-claim")
 async def challenge_claim_endpoint(req: ChallengeClaimRequest):
     """Shrodinger responds to the student's challenge on a specific claim."""
+    enriched_context = build_orchestrator_context(req.context)
     return challenge_claim_live(
         claim_text=req.claim_text,
         claim_verdict=req.claim_verdict,
         student_challenge=req.student_challenge,
         original_question=req.original_question,
-        context=req.context,
+        context=enriched_context,
         history=req.history,
         demo_mode=req.demo_mode,
     )
@@ -294,10 +303,11 @@ async def challenge_claim_endpoint(req: ChallengeClaimRequest):
 @app.post("/generate-text-anchors")
 async def generate_text_anchors_endpoint(req: GenerateTextAnchorsRequest):
     """Generate subtle text anchors for a document excerpt."""
+    enriched_excerpt = build_orchestrator_context(req.document_excerpt)
     return generate_text_anchors_live(
         _document_id=req.document_id,
         selected_topics=req.selected_topics,
-        document_excerpt=req.document_excerpt,
+        document_excerpt=enriched_excerpt,
         demo_mode=req.demo_mode,
     )
 
@@ -305,11 +315,15 @@ async def generate_text_anchors_endpoint(req: GenerateTextAnchorsRequest):
 @app.post("/generate-concept-links")
 async def generate_concept_links_endpoint(req: GenerateConceptLinksRequest):
     """Generate concept link annotations for a document."""
+    learner_trace_summary = merge_learner_trace_summary(
+        req.learner_trace_summary,
+        req.document_excerpt,
+    )
     return generate_concept_links_live(
         _document_id=req.document_id,
         selected_topics=req.selected_topics,
         document_excerpt=req.document_excerpt,
-        learner_trace_summary=req.learner_trace_summary,
+        learner_trace_summary=learner_trace_summary,
         demo_mode=req.demo_mode,
     )
 

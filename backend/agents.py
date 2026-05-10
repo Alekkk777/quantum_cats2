@@ -22,9 +22,15 @@ class OutputAgente(BaseModel):
     mutazioni: list[MutazionePACRAR]
 
 
-async def tool_agente_inquisitore(testo_chunk: str, lacune: list):
+async def tool_agente_inquisitore(testo_chunk: str, lacune: list, cognitive_trace: str = ""):
     """Generate friction mutations for retrieval and application."""
     lacune_str = ", ".join(lacune) if lacune else "the main concepts in the text"
+    trace_block = f"""
+Learner cognitive trace from Braynr:
+{cognitive_trace}
+
+Use this trace only to choose where friction should appear. Do not treat it as source evidence.
+""".strip() if cognitive_trace else "Learner cognitive trace from Braynr: none."
     prompt = f"""
 You are an academic Inquisitor embedded in Shrodinger, an English-language study app.
 
@@ -32,6 +38,8 @@ Analyze this source text:
 {testo_chunk}
 
 The student's known gaps are: {lacune_str}
+
+{trace_block}
 
 Generate exactly 2 JSON mutations:
 1. A 'cloze': hide a key word from the text. Use ___ for the missing word in the 'contenuto' field. The 'target' field must be the exact word from the text.
@@ -55,13 +63,21 @@ Reply only with valid JSON following the provided schema.
     return json.loads(response.text).get("mutazioni", [])
 
 
-async def tool_agente_mentore(testo_chunk: str):
+async def tool_agente_mentore(testo_chunk: str, cognitive_trace: str = ""):
     """Generate support mutations for understanding and elaboration."""
+    trace_block = f"""
+Learner cognitive trace from Braynr:
+{cognitive_trace}
+
+Use this trace only to tailor examples and contrasts. Do not treat it as source evidence.
+""".strip() if cognitive_trace else "Learner cognitive trace from Braynr: none."
     prompt = f"""
 You are a Study Companion embedded in Shrodinger, an English-language study app.
 
 Analyze this source text:
 {testo_chunk}
+
+{trace_block}
 
 Generate exactly 2 JSON mutations:
 1. An 'insight': explain a difficult concept with a practical, concrete example.

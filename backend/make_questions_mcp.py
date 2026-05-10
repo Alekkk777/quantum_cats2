@@ -318,7 +318,9 @@ You must:
    extract the causal justification as a separate claim.
 6. Do not merge a correct statement and an incorrect reason into the same claim.
 7. Do not merge a reason and a consequence into the same claim.
-8. Judge each claim against the source context only.
+8. Judge each claim against the authoritative source document excerpt only.
+   If the context includes a Braynr learner trace section, use that only to tailor
+   friction, missing ideas, and recall prompts. It is not source evidence.
 9. Use verdicts only from:
    - correct
    - partial
@@ -483,6 +485,8 @@ Focus on: {topics_str}
 
 Rules:
 - Each anchor must be tied to a specific quote from the source.
+- If the input includes a Braynr learner trace section, use it only to select useful
+  friction points. source_quote must still come from the source document excerpt.
 - anchor_id should be "{_document_id}" when this excerpt is a single uploaded section.
 - kind must be one of: definition, formula, warning, context, assumption, example
 - priority must be one of: low, medium, high
@@ -534,6 +538,8 @@ Focus on: {topics_str}
 
 Rules:
 - Each link connects two concepts from the source.
+- If learner trace is provided, use it only to prioritize confusing or fragile
+  relationships. source_quote must still come from the source document excerpt.
 - anchor_id should be "{_document_id}" when this excerpt is a single uploaded section.
 - relation must be one of: prerequisite, contrast, causes, supports, example_of, often_confused_with, applies_to
 - explanation must be 1-2 short sentences. Ground in the source only.

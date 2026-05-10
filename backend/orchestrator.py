@@ -141,10 +141,11 @@ async def genera_documento_vivente(sezione_id: str, testo_chunk: str, profilo: d
     Run both mutation agents in parallel and apply the cognitive matrix.
     """
     lacune = profilo.get("grafo_conoscenza", {}).get("lacune", [])
+    cognitive_trace = profilo.get("braynr_cognitive_trace", "")
 
     risultati = await asyncio.gather(
-        tool_agente_inquisitore(testo_chunk, lacune),
-        tool_agente_mentore(testo_chunk),
+        tool_agente_inquisitore(testo_chunk, lacune, cognitive_trace),
+        tool_agente_mentore(testo_chunk, cognitive_trace),
     )
 
     tutte_mutazioni = [item for sublist in risultati for item in sublist]
